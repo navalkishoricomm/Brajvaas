@@ -5,11 +5,14 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -47,7 +50,10 @@ fun WebAdminPortalScreen(
     BackHandler { onBack() }
 
     val context = LocalContext.current
-    val webAdminUrl = "https://ais-dev-uz3cgwrm62eoa457i2fssa-974867323488.asia-southeast1.run.app/admin"
+    val webAdminUrl by viewModel.webServerUrl.collectAsState()
+
+    var isWebViewMode by remember { mutableStateOf(true) }
+    var reloadTrigger by remember { mutableIntStateOf(0) }
 
     var activeTab by remember { mutableIntStateOf(0) }
     // Tabs: 0: Overview, 1: Users, 2: Property Listings, 3: User Leads (Likes/Interests), 4: Short Stays, 5: Location Logs
@@ -75,7 +81,7 @@ fun WebAdminPortalScreen(
                                 color = BrajEmeraldPrimary
                             ) {
                                 Text(
-                                    "LIVE WEB",
+                                    "HTTP 8080",
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -93,6 +99,11 @@ fun WebAdminPortalScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack, modifier = Modifier.testTag("web_admin_back_btn")) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { reloadTrigger++ }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Reload Web View")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -121,7 +132,13 @@ fun WebAdminPortalScreen(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.Language, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(18.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF22C55E))
+                            )
+                            Icon(Icons.Default.Language, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(16.dp))
                             Text(
                                 text = webAdminUrl,
                                 color = Color(0xFFE2E8F0),
@@ -138,7 +155,7 @@ fun WebAdminPortalScreen(
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                     val clip = ClipData.newPlainText("Brajvaas Admin URL", webAdminUrl)
                                     clipboard.setPrimaryClip(clip)
-                                    viewModel.showNotification("Web Admin URL copied to clipboard!")
+                                    viewModel.showNotification("Local Web Admin URL copied: $webAdminUrl")
                                 },
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = Color(0xFF334155),
@@ -150,7 +167,29 @@ fun WebAdminPortalScreen(
                             ) {
                                 Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Copy Link", fontSize = 11.sp)
+                                Text("Copy URL", fontSize = 11.sp)
+                            }
+
+                            // Copy HTML Source Button
+                            FilledTonalButton(
+                                onClick = {
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val html = viewModel.getAdminWebHtml()
+                                    val clip = ClipData.newPlainText("Brajvaas Admin HTML", html)
+                                    clipboard.setPrimaryClip(clip)
+                                    viewModel.showNotification("Complete HTML code copied! Save as admin.html to open on any PC/Mac browser.")
+                                },
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = Color(0xFF334155),
+                                    contentColor = Color.White
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                shape = RoundedCornerShape(6.dp),
+                                modifier = Modifier.testTag("copy_admin_html_btn")
+                            ) {
+                                Icon(Icons.Default.Code, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Copy HTML", fontSize = 11.sp)
                             }
 
                             // Open in Browser Button
@@ -160,7 +199,7 @@ fun WebAdminPortalScreen(
                                     try {
                                         context.startActivity(browserIntent)
                                     } catch (e: Exception) {
-                                        viewModel.showNotification("Link opened in in-app Web View!")
+                                        viewModel.showNotification("Opening in internal Web View tab below.")
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = BrajEmeraldPrimary),
@@ -170,64 +209,168 @@ fun WebAdminPortalScreen(
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Open Web", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text("Open Chrome", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
+                        }
+                    }
+
+                    // Explanatory guidance text for the user
+                    Surface(
+                        color = Color(0xFF0F172A),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFFBBF24), modifier = Modifier.size(14.dp))
+                            Text(
+                                text = "Embedded HTTP server is active on $webAdminUrl. Use the Interactive Web View below, open in Chrome on this device, or copy the HTML for any desktop browser.",
+                                color = Color(0xFF94A3B8),
+                                fontSize = 10.sp
+                            )
                         }
                     }
                 }
             }
 
-            // Scrollable Admin Tabs
-            ScrollableTabRow(
-                selectedTabIndex = activeTab,
-                edgePadding = 16.dp,
-                containerColor = MaterialTheme.colorScheme.surface
+            // View Mode Selector (Interactive Web View vs Native Android Console)
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Tab(
-                    selected = activeTab == 0,
-                    onClick = { activeTab = 0 },
-                    text = { Text("Overview", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = activeTab == 1,
-                    onClick = { activeTab = 1 },
-                    text = { Text("Users (${users.size})", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = activeTab == 2,
-                    onClick = { activeTab = 2 },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("Properties", fontWeight = FontWeight.Bold)
-                            if (pendingCount > 0) {
-                                Badge(containerColor = BrajPendingOrange) { Text("$pendingCount") }
-                            }
-                        }
-                    }
-                )
-                Tab(
-                    selected = activeTab == 3,
-                    onClick = { activeTab = 3 },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("User Likes & Leads", fontWeight = FontWeight.Bold)
-                            if (newLeadsCount > 0) {
-                                Badge(containerColor = BrajSaffronGold) { Text("$newLeadsCount") }
-                            }
-                        }
-                    }
-                )
-                Tab(
-                    selected = activeTab == 4,
-                    onClick = { activeTab = 4 },
-                    text = { Text("Short Stays (₹200)", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = activeTab == 5,
-                    onClick = { activeTab = 5 },
-                    text = { Text("Exact Location Logs", fontWeight = FontWeight.Bold) }
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    FilterChip(
+                        selected = isWebViewMode,
+                        onClick = { isWebViewMode = true },
+                        label = { Text("Interactive Web Browser View", fontWeight = FontWeight.Bold) },
+                        leadingIcon = { Icon(Icons.Default.Language, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = BrajEmeraldPrimary,
+                            selectedLabelColor = Color.White,
+                            selectedLeadingIconColor = Color.White
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    FilterChip(
+                        selected = !isWebViewMode,
+                        onClick = { isWebViewMode = false },
+                        label = { Text("Native Android View", fontWeight = FontWeight.Bold) },
+                        leadingIcon = { Icon(Icons.Default.Dashboard, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = BrajEmeraldPrimary,
+                            selectedLabelColor = Color.White,
+                            selectedLeadingIconColor = Color.White
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
+
+            if (isWebViewMode) {
+                // Interactive Web View embedding the HTML5/JS Web Admin Panel
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    key(reloadTrigger) {
+                        AndroidView(
+                            modifier = Modifier.fillMaxSize(),
+                            factory = { ctx ->
+                                WebView(ctx).apply {
+                                    settings.javaScriptEnabled = true
+                                    settings.domStorageEnabled = true
+                                    settings.allowFileAccess = true
+                                    settings.databaseEnabled = true
+                                    settings.useWideViewPort = true
+                                    settings.loadWithOverviewMode = true
+                                    webViewClient = WebViewClient()
+                                    loadDataWithBaseURL(
+                                        webAdminUrl,
+                                        viewModel.getAdminWebHtml(),
+                                        "text/html",
+                                        "UTF-8",
+                                        null
+                                    )
+                                }
+                            },
+                            update = { webView ->
+                                if (reloadTrigger > 0) {
+                                    webView.loadDataWithBaseURL(
+                                        webAdminUrl,
+                                        viewModel.getAdminWebHtml(),
+                                        "text/html",
+                                        "UTF-8",
+                                        null
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            } else {
+                // Scrollable Native Android Tabs
+                ScrollableTabRow(
+                    selectedTabIndex = activeTab,
+                    edgePadding = 16.dp,
+                    containerColor = MaterialTheme.colorScheme.surface
+                ) {
+                    Tab(
+                        selected = activeTab == 0,
+                        onClick = { activeTab = 0 },
+                        text = { Text("Overview", fontWeight = FontWeight.Bold) }
+                    )
+                    Tab(
+                        selected = activeTab == 1,
+                        onClick = { activeTab = 1 },
+                        text = { Text("Users (${users.size})", fontWeight = FontWeight.Bold) }
+                    )
+                    Tab(
+                        selected = activeTab == 2,
+                        onClick = { activeTab = 2 },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("Properties", fontWeight = FontWeight.Bold)
+                                if (pendingCount > 0) {
+                                    Badge(containerColor = BrajPendingOrange) { Text("$pendingCount") }
+                                }
+                            }
+                        }
+                    )
+                    Tab(
+                        selected = activeTab == 3,
+                        onClick = { activeTab = 3 },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("User Likes & Leads", fontWeight = FontWeight.Bold)
+                                if (newLeadsCount > 0) {
+                                    Badge(containerColor = BrajSaffronGold) { Text("$newLeadsCount") }
+                                }
+                            }
+                        }
+                    )
+                    Tab(
+                        selected = activeTab == 4,
+                        onClick = { activeTab = 4 },
+                        text = { Text("Short Stays (₹200)", fontWeight = FontWeight.Bold) }
+                    )
+                    Tab(
+                        selected = activeTab == 5,
+                        onClick = { activeTab = 5 },
+                        text = { Text("Exact Location Logs", fontWeight = FontWeight.Bold) }
+                    )
+                }
 
             // Tab Content
             when (activeTab) {
@@ -268,6 +411,7 @@ fun WebAdminPortalScreen(
             }
         }
     }
+}
 
     // Rejection Dialog
     if (rejectTargetId != null) {

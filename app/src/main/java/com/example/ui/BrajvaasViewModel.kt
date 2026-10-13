@@ -104,6 +104,25 @@ class BrajvaasViewModel(
     // Location Audit Logs (Exact User Location Tracking)
     val locationAuditLogs: StateFlow<List<UserLocationAuditLog>> = repository.locationAuditLogs
 
+    // Embedded Web Server for Web Admin Panel
+    private val adminWebServer = com.example.data.server.AdminWebServer(repository)
+    private val _webServerUrl = MutableStateFlow("http://127.0.0.1:8080/admin")
+    val webServerUrl: StateFlow<String> = _webServerUrl.asStateFlow()
+
+    init {
+        val port = adminWebServer.start(8080)
+        if (port > 0) {
+            _webServerUrl.value = "http://127.0.0.1:$port/admin"
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        adminWebServer.stop()
+    }
+
+    fun getAdminWebHtml(): String = adminWebServer.generateWebAdminHtml()
+
     // Managed Agreements & Police Verification
     val agreements: StateFlow<List<RentalAgreementTracker>> = repository.agreements
 
@@ -492,7 +511,7 @@ class BrajvaasViewModel(
             text.contains("brokerage", ignoreCase = true) || text.contains("charge", ignoreCase = true) ->
                 "For long-term rentals, Brajvaas charges 15 days rent each from tenant and landlord. We draft the 11-month e-stamped agreement and complete Mathura police verification directly."
             text.contains("admin", ignoreCase = true) || text.contains("web", ignoreCase = true) ->
-                "The Brajvaas Web Admin Portal is live at https://ais-dev-uz3cgwrm62eoa457i2fssa-974867323488.asia-southeast1.run.app/admin and https://brajvaas-admin-portal.web.app for managing users, listings, leads, and logged coordinates."
+                "The Brajvaas Web Admin Portal is live on http://127.0.0.1:8080/admin via the embedded HTTP server and in the in-app Web Console tab for managing users, listings, leads, and logged coordinates."
             text.contains("location", ignoreCase = true) ->
                 "Every user action (posting, renting, buying, short-stays) automatically logs exact GPS coordinates visible on the admin dashboard."
             else ->

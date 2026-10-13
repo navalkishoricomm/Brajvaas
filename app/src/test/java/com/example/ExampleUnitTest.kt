@@ -191,5 +191,31 @@ class ExampleUnitTest {
         assertEquals("Contacted - Discussion Ongoing", updatedLead?.status)
         assertEquals("Called Mukesh on phone", updatedLead?.adminNotes)
     }
+
+    @Test
+    fun testAdminWebServerAndHtmlGeneration() {
+        val repository = BrajvaasRepository()
+        val server = com.example.data.server.AdminWebServer(repository)
+
+        val html = server.generateWebAdminHtml()
+        assertNotNull(html)
+        assertTrue(html.contains("Brajvaas Web Admin Console"))
+        assertTrue(html.contains("Vrindavan Short Stays"))
+        assertTrue(html.contains("15 days rent"))
+        assertTrue(html.contains("₹200 from tenant and ₹200 from landlord"))
+
+        val json = server.generateJsonSnapshot()
+        assertNotNull(json)
+        assertTrue(json.contains("\"users\":["))
+        assertTrue(json.contains("\"properties\":["))
+        assertTrue(json.contains("\"shortStays\":["))
+        assertTrue(json.contains("\"locationLogs\":["))
+
+        val port = server.start(8090)
+        assertTrue(port > 0)
+        assertTrue(server.isRunning)
+        server.stop()
+        assertFalse(server.isRunning)
+    }
 }
 
