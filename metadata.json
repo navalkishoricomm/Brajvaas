@@ -1,0 +1,6 @@
+{
+  "name": "Brajvaas",
+  "description": "Brajvaas is the dedicated real estate portal for Vrindavan and Mathura. Find and post properties for rent or sale, filter by temple proximity, chat securely with owners, track rent payments, and access verified listings with admin moderation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
