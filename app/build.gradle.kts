@@ -8,6 +8,17 @@ plugins {
   alias(libs.plugins.google.services)
 }
 
+// Ensure .env file exists so Secrets Gradle Plugin and Gradle configuration cache never fail
+val envFile = rootProject.file(".env")
+if (!envFile.exists()) {
+  val envExample = rootProject.file(".env.example")
+  if (envExample.exists()) {
+    envExample.copyTo(envFile, overwrite = false)
+  } else {
+    envFile.writeText("# Auto-generated .env\n")
+  }
+}
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
