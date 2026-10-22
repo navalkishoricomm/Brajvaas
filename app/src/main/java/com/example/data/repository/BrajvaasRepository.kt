@@ -11,7 +11,7 @@ import java.util.*
 
 class BrajvaasRepository {
 
-    private val _properties = MutableStateFlow<List<PropertyListing>>(getInitialProperties())
+    private val _properties = MutableStateFlow<List<PropertyListing>>(emptyList())
     val properties: StateFlow<List<PropertyListing>> = _properties.asStateFlow()
 
     // Authentication State
@@ -37,25 +37,19 @@ class BrajvaasRepository {
     val usersList: StateFlow<List<UserProfile>> = _usersList.asStateFlow()
 
     // Shortlisted Property IDs
-    private val _shortlistedPropertyIds = MutableStateFlow<Set<String>>(setOf("prop_1", "prop_short_1"))
+    private val _shortlistedPropertyIds = MutableStateFlow<Set<String>>(emptySet())
     val shortlistedPropertyIds: StateFlow<Set<String>> = _shortlistedPropertyIds.asStateFlow()
 
     // Visited Property Records
-    private val _visitedProperties = MutableStateFlow<List<VisitedPropertyRecord>>(
-        listOf(
-            VisitedPropertyRecord("prop_1", System.currentTimeMillis() - 7200000, "27.5794° N, 77.6881° E"),
-            VisitedPropertyRecord("prop_short_1", System.currentTimeMillis() - 14400000, "27.5812° N, 77.6795° E"),
-            VisitedPropertyRecord("prop_2", System.currentTimeMillis() - 86400000, "27.5681° N, 77.6942° E")
-        )
-    )
+    private val _visitedProperties = MutableStateFlow<List<VisitedPropertyRecord>>(emptyList())
     val visitedProperties: StateFlow<List<VisitedPropertyRecord>> = _visitedProperties.asStateFlow()
 
-    // Short Stays Bookings (Vrindavan Airbnb - Flat Rs 200 fee from tenant & landlord)
-    private val _shortStayBookings = MutableStateFlow<List<ShortStayBooking>>(getInitialShortStayBookings())
+    // Short Stays Bookings (Vrindavan)
+    private val _shortStayBookings = MutableStateFlow<List<ShortStayBooking>>(emptyList())
     val shortStayBookings: StateFlow<List<ShortStayBooking>> = _shortStayBookings.asStateFlow()
 
     // User Interest Leads (Admin panel tracks when a user likes/shortlists/inquiries a property)
-    private val _userInterestLeads = MutableStateFlow<List<UserInterestLead>>(getInitialInterestLeads())
+    private val _userInterestLeads = MutableStateFlow<List<UserInterestLead>>(emptyList())
     val userInterestLeads: StateFlow<List<UserInterestLead>> = _userInterestLeads.asStateFlow()
 
     // Exact Location Audit Logs (Logs location of whoever is posting, taking on rent, buying, or short stays)
@@ -484,6 +478,36 @@ class BrajvaasRepository {
         }
     }
 
+    fun updatePropertyAvailability(propertyId: String, newStatus: AvailabilityStatus) {
+        val now = System.currentTimeMillis()
+        _properties.update { list ->
+            list.map {
+                if (it.id == propertyId) {
+                    it.copy(
+                        availabilityStatus = newStatus,
+                        closedAtTimestamp = if (newStatus != AvailabilityStatus.AVAILABLE) now else null
+                    )
+                } else it
+            }
+        }
+    }
+
+    fun updatePropertyDetails(updated: PropertyListing) {
+        _properties.update { list ->
+            list.map {
+                if (it.id == updated.id) updated else it
+            }
+        }
+    }
+
+    fun clearAllProperties() {
+        _properties.value = emptyList()
+        _shortlistedPropertyIds.value = emptySet()
+        _visitedProperties.value = emptyList()
+        _userInterestLeads.value = emptyList()
+        _shortStayBookings.value = emptyList()
+    }
+
     fun getOrCreateConversation(property: PropertyListing): String {
         val convId = "conv_${property.id}"
         val existing = _conversations.value.find { it.id == convId }
@@ -495,8 +519,8 @@ class BrajvaasRepository {
                 propertyLocality = "${property.locality}, ${property.city}",
                 propertyPrice = property.price,
                 listingType = property.listingType,
-                recipientName = "Owner (${property.bhk})",
-                lastMessage = "Brajvaas managed channel opened for this property.",
+                recipientName = "Brajvaas Dedicated Admin",
+                lastMessage = "Official Brajvaas Admin Desk connected.",
                 lastTimestamp = System.currentTimeMillis(),
                 unreadCount = 0
             )
@@ -507,10 +531,10 @@ class BrajvaasRepository {
                         id = "msg_${System.currentTimeMillis()}",
                         conversationId = convId,
                         propertyId = property.id,
-                        senderId = "system",
-                        senderName = "Brajvaas Desk",
-                        messageText = "Radhe Radhe! Direct communication connected. Brajvaas charges 15 days rent brokerage upon agreement. Full rental agreement and Mathura police verification will be executed by our team.",
-                        timestamp = System.currentTimeMillis() - 5000,
+                        senderId = "admin",
+                        senderName = "Brajvaas Admin Desk",
+                        messageText = "Radhe Radhe! You are directly connected with Brajvaas Admin for '${property.title}'. Landlord details remain confidential for security. Our team arranges assisted property viewings, landlord meetings, 15-day rental agreement drafting, and Mathura Police KYC verification. How can we help you today?",
+                        timestamp = System.currentTimeMillis() - 2000,
                         isFromMe = false
                     )
                 )
@@ -885,7 +909,9 @@ class BrajvaasRepository {
         )
     }
 
-    private fun getInitialProperties(): List<PropertyListing> {
+    private fun getInitialProperties(): List<PropertyListing> = emptyList()
+
+    private fun legacyInitialProperties(): List<PropertyListing> {
         return listOf(
             PropertyListing(
                 id = "prop_1",

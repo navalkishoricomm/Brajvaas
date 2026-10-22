@@ -134,6 +134,42 @@ class AdminWebServer(private val repository: BrajvaasRepository) {
                         }
                         sendResponse(out, "200 OK", "application/json; charset=utf-8", "{\"success\":true,\"userId\":\"$id\"}".toByteArray(StandardCharsets.UTF_8))
                     }
+                    path == "/api/mark-availability" -> {
+                        val id = params["id"] ?: ""
+                        val statusStr = params["status"] ?: "AVAILABLE"
+                        val status = try {
+                            com.example.data.model.AvailabilityStatus.valueOf(statusStr)
+                        } catch (e: Exception) {
+                            com.example.data.model.AvailabilityStatus.AVAILABLE
+                        }
+                        if (id.isNotBlank()) {
+                            repository.updatePropertyAvailability(id, status)
+                        }
+                        sendResponse(out, "200 OK", "application/json; charset=utf-8", "{\"success\":true,\"id\":\"$id\",\"status\":\"${status.name}\"}".toByteArray(StandardCharsets.UTF_8))
+                    }
+                    path == "/api/edit-property" -> {
+                        val id = params["id"] ?: ""
+                        val current = repository.properties.value.find { it.id == id }
+                        if (current != null) {
+                            val updated = current.copy(
+                                title = params["title"]?.takeIf { it.isNotBlank() } ?: current.title,
+                                price = params["price"]?.toLongOrNull() ?: current.price,
+                                bhk = params["bhk"]?.takeIf { it.isNotBlank() } ?: current.bhk,
+                                locality = params["locality"]?.takeIf { it.isNotBlank() } ?: current.locality,
+                                builtUpAreaSqFt = params["builtUpAreaSqFt"]?.toIntOrNull() ?: current.builtUpAreaSqFt,
+                                fullAddress = params["fullAddress"]?.takeIf { it.isNotBlank() } ?: current.fullAddress,
+                                landmark = params["landmark"]?.takeIf { it.isNotBlank() } ?: current.landmark,
+                                ownerName = params["ownerName"]?.takeIf { it.isNotBlank() } ?: current.ownerName,
+                                ownerPhone = params["ownerPhone"]?.takeIf { it.isNotBlank() } ?: current.ownerPhone
+                            )
+                            repository.updatePropertyDetails(updated)
+                        }
+                        sendResponse(out, "200 OK", "application/json; charset=utf-8", "{\"success\":true,\"id\":\"$id\"}".toByteArray(StandardCharsets.UTF_8))
+                    }
+                    path == "/api/clear-all" -> {
+                        repository.clearAllProperties()
+                        sendResponse(out, "200 OK", "application/json; charset=utf-8", "{\"success\":true,\"message\":\"All postings cleared\"}".toByteArray(StandardCharsets.UTF_8))
+                    }
                     path == "/health" -> {
                         sendResponse(out, "200 OK", "text/plain", "OK".toByteArray(StandardCharsets.UTF_8))
                     }
@@ -199,7 +235,7 @@ class AdminWebServer(private val repository: BrajvaasRepository) {
         sb.append("],\"properties\":[")
         properties.forEachIndexed { i, p ->
             if (i > 0) sb.append(",")
-            sb.append("{\"id\":\"${escapeJs(p.id)}\",\"title\":\"${escapeJs(p.title)}\",\"locality\":\"${escapeJs(p.locality)}\",\"price\":${p.price},\"status\":\"${p.approvalStatus.name}\",\"type\":\"${p.listingType.name}\",\"owner\":\"${escapeJs(p.ownerName)}\",\"phone\":\"${escapeJs(p.ownerPhone)}\",\"temple\":\"${p.templeDistances.premMandirKm} km from Prem Mandir\",\"verified\":${p.isVerified},\"coords\":\"${escapeJs(p.loggedCoordinates)}\"}")
+            sb.append("{\"id\":\"${escapeJs(p.id)}\",\"title\":\"${escapeJs(p.title)}\",\"locality\":\"${escapeJs(p.locality)}\",\"city\":\"${escapeJs(p.city)}\",\"price\":${p.price},\"bhk\":\"${escapeJs(p.bhk)}\",\"status\":\"${p.approvalStatus.name}\",\"approvalStatus\":\"${p.approvalStatus.name}\",\"availabilityStatus\":\"${p.availabilityStatus.name}\",\"type\":\"${p.listingType.name}\",\"listingType\":\"${p.listingType.name}\",\"owner\":\"${escapeJs(p.ownerName)}\",\"ownerName\":\"${escapeJs(p.ownerName)}\",\"phone\":\"${escapeJs(p.ownerPhone)}\",\"ownerPhone\":\"${escapeJs(p.ownerPhone)}\",\"fullAddress\":\"${escapeJs(p.fullAddress)}\",\"landmark\":\"${escapeJs(p.landmark)}\",\"builtUpAreaSqFt\":${p.builtUpAreaSqFt},\"temple\":\"${p.templeDistances.premMandirKm} km from Prem Mandir\",\"verified\":${p.isVerified},\"closedAt\":${p.closedAtTimestamp ?: "null"},\"photos\":[${p.photos.joinToString(",") { "\"${escapeJs(it)}\"" }}],\"coords\":\"${escapeJs(p.loggedCoordinates)}\"}")
         }
         sb.append("],\"leads\":[")
         leads.forEachIndexed { i, l ->
@@ -221,6 +257,20 @@ class AdminWebServer(private val repository: BrajvaasRepository) {
     }
 
     fun generateWebAdminHtml(): String {
+        val assetFile = java.io.File("/app/src/main/assets/admin_portal.html")
+        if (assetFile.exists()) {
+            return assetFile.readText(StandardCharsets.UTF_8)
+        }
+        val localFile = java.io.File("admin_portal.html")
+        if (localFile.exists()) {
+            return localFile.readText(StandardCharsets.UTF_8)
+        }
+        val clHtml = javaClass.classLoader?.getResourceAsStream("assets/admin_portal.html")?.bufferedReader(StandardCharsets.UTF_8)?.use { it.readText() }
+            ?: javaClass.classLoader?.getResourceAsStream("admin_portal.html")?.bufferedReader(StandardCharsets.UTF_8)?.use { it.readText() }
+        if (!clHtml.isNullOrBlank()) {
+            return clHtml
+        }
+
         val users = repository.usersList.value
         val properties = repository.properties.value
         val leads = repository.userInterestLeads.value

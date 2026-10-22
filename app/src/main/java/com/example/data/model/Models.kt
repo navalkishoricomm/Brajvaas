@@ -28,6 +28,13 @@ enum class ApprovalStatus(val displayName: String) {
     REJECTED("Rejected")
 }
 
+enum class AvailabilityStatus(val displayName: String) {
+    AVAILABLE("Available"),
+    RENTED_OUT("Rented Out"),
+    SOLD("Sold"),
+    FULLY_BOOKED("Fully Booked / Full")
+}
+
 enum class PaymentStatus(val displayName: String) {
     PAID("Paid"),
     PENDING("Due Soon"),
@@ -69,9 +76,12 @@ data class PropertyListing(
     val templeDistances: TempleDistances,
     val legalStatus: String = "MVDA Approved & Freehold",
     val approvalStatus: ApprovalStatus = ApprovalStatus.PENDING_APPROVAL,
+    val availabilityStatus: AvailabilityStatus = AvailabilityStatus.AVAILABLE,
+    val closedAtTimestamp: Long? = null,
     val adminFeedback: String? = null,
     val isVerified: Boolean = false,
     val imageDrawableRes: Int? = null,
+    val photos: List<String> = emptyList(),
     val createdAtTimestamp: Long = System.currentTimeMillis(),
     val loggedCoordinates: String = "27.5794° N, 77.6881° E",
     val loggedLocality: String = "Raman Reti, Vrindavan",

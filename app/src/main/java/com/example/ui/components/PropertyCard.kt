@@ -27,6 +27,7 @@ import com.example.R
 import com.example.data.model.ListingType
 import com.example.data.model.PropertyListing
 import com.example.ui.theme.*
+import coil.compose.AsyncImage
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -65,12 +66,21 @@ fun PropertyCard(
                     .height(180.dp)
             ) {
                 val imageRes = property.imageDrawableRes ?: R.drawable.img_brajvaas_hero
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = property.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (property.photos.isNotEmpty()) {
+                    AsyncImage(
+                        model = property.photos.first(),
+                        contentDescription = property.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = property.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 // Top Left Badges: Listing Type & Verified Badge
                 Row(
@@ -222,6 +232,36 @@ fun PropertyCard(
                             fontWeight = FontWeight.Black,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
+                    }
+                }
+
+                // Photo count badge if property has photos
+                if (property.photos.isNotEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color.Black.copy(alpha = 0.7f),
+                        modifier = Modifier
+                            .align(if (isShortlisted) Alignment.CenterEnd else Alignment.BottomEnd)
+                            .padding(end = 8.dp, bottom = if (isShortlisted) 0.dp else 8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.PhotoLibrary,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(11.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "${property.photos.size}",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -378,7 +418,7 @@ fun PropertyCard(
                         )
                     }
 
-                    // Chat Button
+                    // Chat Button (Connects with Brajvaas Admin Desk)
                     FilledTonalButton(
                         onClick = onChatClick,
                         colors = ButtonDefaults.filledTonalButtonColors(
@@ -390,13 +430,13 @@ fun PropertyCard(
                         modifier = Modifier.testTag("chat_owner_btn_${property.id}")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ChatBubbleOutline,
+                            imageVector = Icons.Default.SupportAgent,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Chat Owner",
+                            text = "Chat Admin",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )

@@ -146,16 +146,17 @@ class BrajvaasViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Derived: Vrindavan Short Stays list (like Airbnb exclusively for Vrindavan)
+    // Derived: Vrindavan Short Stays list (strictly available only)
     val vrindavanShortStays: StateFlow<List<PropertyListing>> = repository.properties.map { list ->
         list.filter {
             it.listingType == ListingType.SHORT_STAY &&
             it.city.equals("Vrindavan", ignoreCase = true) &&
-            it.approvalStatus == ApprovalStatus.APPROVED
+            it.approvalStatus == ApprovalStatus.APPROVED &&
+            it.availabilityStatus == AvailabilityStatus.AVAILABLE
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Filtered properties for seekers: Strictly ONLY properties where approvalStatus == APPROVED!
+    // Filtered properties for seekers: Strictly ONLY properties where approvalStatus == APPROVED and availabilityStatus == AVAILABLE!
     val visibleProperties: StateFlow<List<PropertyListing>> = combine(
         repository.properties,
         _searchQuery,
@@ -163,6 +164,7 @@ class BrajvaasViewModel(
     ) { props, query, f ->
         props.filter { p ->
             p.approvalStatus == ApprovalStatus.APPROVED &&
+            p.availabilityStatus == AvailabilityStatus.AVAILABLE &&
             p.listingType == f.listingType &&
             (f.locality == "All" || p.locality.equals(f.locality, ignoreCase = true) || p.city.equals(f.locality, ignoreCase = true)) &&
             (f.bhkList.isEmpty() || f.bhkList.contains(p.bhk)) &&
@@ -178,6 +180,24 @@ class BrajvaasViewModel(
                     p.city.contains(query, ignoreCase = true) ||
                     p.landmark.contains(query, ignoreCase = true) ||
                     p.bhk.contains(query, ignoreCase = true))
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Archived Properties (Sold, Rented Out, Fully Booked) - ONLY visible to Admin
+    val archivedProperties: StateFlow<List<PropertyListing>> = repository.properties.map { list ->
+        list.filter { it.availabilityStatus != AvailabilityStatus.AVAILABLE }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // My Posted Properties (for current user / poster to view and mark sold/rented)
+    val myProperties: StateFlow<List<PropertyListing>> = combine(
+        repository.properties,
+        repository.currentUser
+    ) { props, user ->
+        if (user == null) emptyList()
+        else props.filter {
+            it.ownerPhone == user.phone ||
+            it.ownerName.equals(user.fullName, ignoreCase = true) ||
+            it.ownerId == user.id
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -395,6 +415,27 @@ class BrajvaasViewModel(
         repository.adminToggleVerification(propertyId)
     }
 
+    fun markPropertyAvailability(propertyId: String, newStatus: AvailabilityStatus) {
+        repository.updatePropertyAvailability(propertyId, newStatus)
+        val statusLabel = when (newStatus) {
+            AvailabilityStatus.RENTED_OUT -> "Rented Out"
+            AvailabilityStatus.SOLD -> "Sold"
+            AvailabilityStatus.FULLY_BOOKED -> "Fully Booked"
+            AvailabilityStatus.AVAILABLE -> "Available (Live)"
+        }
+        showNotification("Property marked as $statusLabel.")
+    }
+
+    fun updatePropertyDetails(updated: PropertyListing) {
+        repository.updatePropertyDetails(updated)
+        showNotification("Property '${updated.title}' updated successfully.")
+    }
+
+    fun clearAllPostings() {
+        repository.clearAllProperties()
+        showNotification("All postings cleared. Starting fresh from beginning.")
+    }
+
     fun submitNewProperty(
         title: String,
         listingType: ListingType,
@@ -424,6 +465,7 @@ class BrajvaasViewModel(
         legalStatus: String,
         ownerName: String,
         ownerPhone: String,
+        photos: List<String> = emptyList(),
         loggedCoordinates: String = "27.5794° N, 77.6881° E",
         loggedLocality: String = "Vrindavan"
     ) {
@@ -461,6 +503,7 @@ class BrajvaasViewModel(
             approvalStatus = ApprovalStatus.PENDING_APPROVAL,
             isVerified = false,
             imageDrawableRes = R.drawable.img_ashram_villa,
+            photos = photos,
             loggedCoordinates = loggedCoordinates,
             loggedLocality = loggedLocality,
             ownerName = ownerName,

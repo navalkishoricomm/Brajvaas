@@ -3,7 +3,11 @@ package com.example.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.R
 import com.example.data.model.ListingType
 import com.example.data.model.PropertyListing
@@ -47,6 +52,8 @@ fun PropertyDetailScreen(
         }
         return
     }
+
+    var activePhotoIndex by remember { mutableIntStateOf(0) }
 
     // Automatically record visit in user history
     LaunchedEffect(property.id) {
@@ -108,9 +115,9 @@ fun PropertyDetailScreen(
                             .testTag("chat_owner_detail_btn"),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.SupportAgent, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Chat Owner", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Chat with Admin", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
 
                     if (property.listingType == ListingType.SHORT_STAY) {
@@ -160,12 +167,22 @@ fun PropertyDetailScreen(
                     .height(240.dp)
             ) {
                 val imageRes = property.imageDrawableRes ?: R.drawable.img_brajvaas_hero
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = property.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (property.photos.isNotEmpty()) {
+                    val safeIndex = activePhotoIndex.coerceIn(0, property.photos.lastIndex)
+                    AsyncImage(
+                        model = property.photos[safeIndex],
+                        contentDescription = property.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = property.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 // Badges overlay
                 Row(
@@ -220,6 +237,61 @@ fun PropertyDetailScreen(
                             Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("Shortlisted", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                // Photo Counter Tag
+                if (property.photos.isNotEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(topStart = 8.dp),
+                        color = Color.Black.copy(alpha = 0.7f),
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        ) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "${activePhotoIndex.coerceIn(0, property.photos.lastIndex) + 1} / ${property.photos.size} Photos",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Photo Gallery Thumbnails Strip (if multiple photos)
+            if (property.photos.size > 1) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    itemsIndexed(property.photos) { index, photoUrl ->
+                        val isSelected = index == activePhotoIndex
+                        Box(
+                            modifier = Modifier
+                                .size(84.dp, 64.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(
+                                    width = if (isSelected) 2.5.dp else 1.dp,
+                                    color = if (isSelected) BrajEmeraldPrimary else Color.LightGray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { activePhotoIndex = index }
+                        ) {
+                            AsyncImage(
+                                model = photoUrl,
+                                contentDescription = "Thumbnail ${index + 1}",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                     }
                 }

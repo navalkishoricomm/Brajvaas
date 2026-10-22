@@ -1,9 +1,17 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -14,12 +22,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.data.model.FurnishingStatus
 import com.example.data.model.ListingType
 import com.example.data.model.PropertyType
@@ -28,6 +39,7 @@ import com.example.ui.theme.BrajEmeraldContainer
 import com.example.ui.theme.BrajEmeraldPrimary
 import com.example.ui.theme.BrajPendingOrange
 import com.example.ui.theme.BrajSaffronGold
+import com.example.ui.theme.BrajVerifiedGreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -36,6 +48,26 @@ fun PostPropertyScreen(
     onBack: () -> Unit
 ) {
     BackHandler { onBack() }
+
+    // Photos state (Mandatory: Min 3, Max 15)
+    val selectedPhotoUris = remember { mutableStateListOf<String>() }
+    var photoError by remember { mutableStateOf<String?>(null) }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 15)
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            for (uri in uris) {
+                val str = uri.toString()
+                if (!selectedPhotoUris.contains(str) && selectedPhotoUris.size < 15) {
+                    selectedPhotoUris.add(str)
+                }
+            }
+            if (selectedPhotoUris.size >= 3) {
+                photoError = null
+            }
+        }
+    }
 
     // Form states
     var listingType by remember { mutableStateOf(ListingType.RENT) }
@@ -289,7 +321,178 @@ fun PostPropertyScreen(
                 }
             }
 
-            // Section 3: Sacred Temple Distances
+            // Section 3: Property Photos (Mandatory: Min 3, Max 15)
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.testTag("post_property_photos_card")
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = BrajEmeraldPrimary)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("3. Property Photos *", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (selectedPhotoUris.size >= 3) BrajVerifiedGreen else BrajPendingOrange
+                        ) {
+                            Text(
+                                text = "${selectedPhotoUris.size}/15 Photos (Min 3)",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Mandatory Policy: Minimum 3 photos are required for all listings (e.g. Hall, Bedroom, Mandir view, Kitchen). Up to 15 photos can be uploaded per property.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // Error warning if < 3 photos
+                    if (selectedPhotoUris.size < 3) {
+                        Surface(
+                            color = Color(0xFFFEF2F2),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (photoError != null) photoError!! else "At least 3 photos mandatory! Add ${3 - selectedPhotoUris.size} more photo(s).",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFFB91C1C),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    // Main Action: Choose from device
+                    Button(
+                        onClick = {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = BrajEmeraldPrimary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("upload_photos_btn"),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.AddPhotoAlternate, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (selectedPhotoUris.isEmpty()) "Select Photos from Gallery (Min 3)" else "Add More Photos (${selectedPhotoUris.size}/15)"
+                        )
+                    }
+
+                    // Quick Room Preset Samples (Vrindavan standard spaces)
+                    Text("Or Quick-Add Verified Room Samples:", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val samplePhotos = listOf(
+                            Pair("Living Hall", "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80"),
+                            Pair("Pooja / Mandir", "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600&auto=format&fit=crop&q=80"),
+                            Pair("Master Bedroom", "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&auto=format&fit=crop&q=80"),
+                            Pair("Balcony View", "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80"),
+                            Pair("Modular Kitchen", "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80")
+                        )
+                        samplePhotos.forEach { (label, url) ->
+                            AssistChip(
+                                onClick = {
+                                    if (selectedPhotoUris.size < 15 && !selectedPhotoUris.contains(url)) {
+                                        selectedPhotoUris.add(url)
+                                        if (selectedPhotoUris.size >= 3) photoError = null
+                                    }
+                                },
+                                label = { Text("+ $label", fontSize = 11.sp) }
+                            )
+                        }
+                    }
+
+                    // Selected photos gallery list
+                    if (selectedPhotoUris.isNotEmpty()) {
+                        Text("Selected Photos (${selectedPhotoUris.size}) - Tap ✕ to remove:", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            itemsIndexed(selectedPhotoUris) { index, photoUrl ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(110.dp, 90.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .border(1.dp, BrajEmeraldPrimary.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                ) {
+                                    AsyncImage(
+                                        model = photoUrl,
+                                        contentDescription = "Photo ${index + 1}",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                    // Index Tag
+                                    Surface(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        shape = RoundedCornerShape(bottomEnd = 6.dp),
+                                        modifier = Modifier.align(Alignment.TopStart)
+                                    ) {
+                                        Text(
+                                            text = "#${index + 1}",
+                                            color = Color.White,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                        )
+                                    }
+
+                                    // Remove 'X' button
+                                    IconButton(
+                                        onClick = { selectedPhotoUris.removeAt(index) },
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .align(Alignment.TopEnd)
+                                            .padding(2.dp)
+                                            .background(Color.Red.copy(alpha = 0.8f), CircleShape)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = "Remove photo",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Section 4: Sacred Temple Distances
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -301,7 +504,7 @@ fun PostPropertyScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.TempleHindu, contentDescription = null, tint = BrajSaffronGold)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("3. Temple Proximity (in Kilometers)", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                        Text("4. Temple Proximity (in Kilometers)", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -660,6 +863,12 @@ fun PostPropertyScreen(
             // Submit Button
             Button(
                 onClick = {
+                    if (selectedPhotoUris.size < 3) {
+                        photoError = "Minimum 3 property photos are mandatory before submitting! (${selectedPhotoUris.size}/3 added)"
+                        viewModel.showNotification("Upload at least 3 photos of the property to continue.")
+                        return@Button
+                    }
+
                     val finalTitle = title.ifBlank { "$bhk $selectedLocality $selectedCity" }
                     val finalPrice = when (listingType) {
                         ListingType.SHORT_STAY -> 0L
@@ -705,7 +914,8 @@ fun PostPropertyScreen(
                         yamunaGhatKm = yamunaGhatKmText.toDoubleOrNull() ?: 1.0,
                         legalStatus = legalStatusStr,
                         ownerName = ownerName,
-                        ownerPhone = ownerPhone
+                        ownerPhone = ownerPhone,
+                        photos = selectedPhotoUris.toList()
                     )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = BrajEmeraldPrimary),

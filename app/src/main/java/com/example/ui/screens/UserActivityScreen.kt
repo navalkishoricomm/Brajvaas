@@ -21,11 +21,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.PropertyListing
+import com.example.data.model.*
 import com.example.ui.AppScreen
 import com.example.ui.BrajvaasViewModel
 import com.example.ui.components.PropertyCard
 import com.example.ui.theme.*
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,8 +41,9 @@ fun UserActivityScreen(
     val shortlistedProps by viewModel.shortlistedProperties.collectAsState()
     val visitedPropsWithTime by viewModel.visitedPropertiesWithListing.collectAsState()
     val agreements by viewModel.agreements.collectAsState()
+    val myProperties by viewModel.myProperties.collectAsState()
 
-    var activeTab by remember { mutableStateOf(0) } // 0: Shortlisted, 1: Visited, 2: Agreements
+    var activeTab by remember { mutableStateOf(0) } // 0: Shortlisted, 1: Visited, 2: Agreements, 3: My Postings
 
     Scaffold(
         topBar = {
@@ -227,6 +229,14 @@ fun UserActivityScreen(
                         leadingIcon = { Icon(Icons.Default.Assignment, contentDescription = null, modifier = Modifier.size(16.dp)) },
                         modifier = Modifier.testTag("tab_agreements")
                     )
+
+                    FilterChip(
+                        selected = activeTab == 3,
+                        onClick = { activeTab = 3 },
+                        label = { Text("My Postings (${myProperties.size})", fontWeight = FontWeight.Bold) },
+                        leadingIcon = { Icon(Icons.Default.AddHomeWork, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        modifier = Modifier.testTag("tab_my_postings")
+                    )
                 }
             }
 
@@ -305,6 +315,204 @@ fun UserActivityScreen(
                             onAdvanceAgreement = { viewModel.advanceAgreementStep(agr.id) },
                             onAdvancePv = { viewModel.advancePoliceVerification(agr.id) }
                         )
+                    }
+                }
+
+                3 -> {
+                    // MY POSTED PROPERTIES (Owner can manage & mark sold/rented/full)
+                    if (myProperties.isEmpty()) {
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Icon(Icons.Default.AddHomeWork, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(36.dp))
+                                    Text("You haven't posted any properties yet.", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text(
+                                        "List your Ashram flat, room, villa, or land in Vrindavan/Mathura. You can mark them as rented out, sold, or full at any time.",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Button(
+                                        onClick = { viewModel.navigateTo(AppScreen.POST_PROPERTY) },
+                                        colors = ButtonDefaults.buttonColors(containerColor = BrajEmeraldPrimary),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text("+ Post a Property Now")
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = BrajEmeraldContainer,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Lock, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(18.dp))
+                                    Text(
+                                        text = "Owner Controls: When deal is finalized, mark your property below. It will be moved to archived records and hidden from public search.",
+                                        fontSize = 11.sp,
+                                        color = BrajOnEmeraldContainer
+                                    )
+                                }
+                            }
+                        }
+
+                        items(myProperties, key = { it.id }) { prop ->
+                            MyPostedPropertyCard(
+                                property = prop,
+                                onMarkStatus = { newStatus -> viewModel.markPropertyAvailability(prop.id, newStatus) },
+                                onCardClick = { viewModel.selectProperty(prop) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MyPostedPropertyCard(
+    property: PropertyListing,
+    onMarkStatus: (AvailabilityStatus) -> Unit,
+    onCardClick: () -> Unit
+) {
+    val indianFormat = NumberFormat.getNumberInstance(Locale("en", "IN"))
+    val isAvailable = property.availabilityStatus == AvailabilityStatus.AVAILABLE
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onCardClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = when (property.availabilityStatus) {
+                        AvailabilityStatus.AVAILABLE -> BrajVerifiedGreen
+                        AvailabilityStatus.RENTED_OUT -> Color(0xFF64748B)
+                        AvailabilityStatus.SOLD -> Color(0xFF7C3AED)
+                        AvailabilityStatus.FULLY_BOOKED -> Color(0xFF0284C7)
+                    }
+                ) {
+                    Text(
+                        text = property.availabilityStatus.displayName.uppercase(),
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+
+                if (property.approvalStatus == ApprovalStatus.PENDING_APPROVAL) {
+                    Surface(shape = RoundedCornerShape(6.dp), color = BrajPendingOrange) {
+                        Text(
+                            text = "UNDER ADMIN REVIEW",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+            }
+
+            Text(text = property.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text(
+                text = "${property.bhk} • ${property.locality}, ${property.city}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                when (property.listingType) {
+                    ListingType.RENT -> {
+                        if (isAvailable) {
+                            Button(
+                                onClick = { onMarkStatus(AvailabilityStatus.RENTED_OUT) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF475569)),
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Mark as Rented Out", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { onMarkStatus(AvailabilityStatus.AVAILABLE) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Re-list as Available", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                    ListingType.SELL -> {
+                        if (isAvailable) {
+                            Button(
+                                onClick = { onMarkStatus(AvailabilityStatus.SOLD) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED)),
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Mark as Sold", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { onMarkStatus(AvailabilityStatus.AVAILABLE) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Re-list as Available", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                    ListingType.SHORT_STAY -> {
+                        if (isAvailable) {
+                            Button(
+                                onClick = { onMarkStatus(AvailabilityStatus.FULLY_BOOKED) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Mark as Full / Booked", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { onMarkStatus(AvailabilityStatus.AVAILABLE) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Re-open for Pilgrims", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
             }

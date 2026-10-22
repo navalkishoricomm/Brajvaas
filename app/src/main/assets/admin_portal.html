@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brajvaas Web Admin Console</title>
+  <title>Brajvaas Central Admin Portal</title>
   <style>
     :root {
       --primary: #0F5A47;
-      --primary-light: #E8F5F1;
-      --primary-dark: #09372B;
+      --primary-light: #EBF7F3;
+      --primary-dark: #073B2E;
       --accent: #D97706;
-      --bg: #F8FAFC;
+      --bg: #F1F5F9;
       --surface: #FFFFFF;
       --text: #0F172A;
       --muted: #64748B;
@@ -18,741 +18,854 @@
       --success: #16A34A;
       --danger: #DC2626;
       --warning: #EA580C;
+      --info: #0284C7;
+      --purple: #7C3AED;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
-    header { background: #1E293B; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 60px; }
+    
+    /* Top Header */
+    header { background: #0F172A; color: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); }
     .logo-row { display: flex; align-items: center; gap: 12px; }
-    .badge-live { background: var(--primary); color: white; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .server-pill { background: #334155; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #38BDF8; font-family: monospace; display: flex; align-items: center; gap: 6px; }
+    .logo-badge { background: var(--primary); color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .server-pill { background: #1E293B; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #38BDF8; display: flex; align-items: center; gap: 6px; border: 1px solid #334155; }
     .indicator { width: 8px; height: 8px; background: #22C55E; border-radius: 50%; box-shadow: 0 0 8px #22C55E; display: inline-block; }
     
-    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 24px; max-width: 1400px; margin: 0 auto; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .stat-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-size: 26px; font-weight: 800; color: var(--primary-dark); margin-top: 4px; }
-    .stat-sub { font-size: 11px; color: var(--accent); font-weight: 600; margin-top: 2px; }
+    /* Top Stats Bar */
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; padding: 20px 24px 10px; max-width: 1400px; margin: 0 auto; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .stat-card.active-stat { border-color: var(--primary); background: var(--primary-light); }
+    .stat-header { display: flex; justify-content: space-between; align-items: center; }
+    .stat-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-icon { font-size: 20px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--text); margin-top: 6px; }
+    .stat-sub { font-size: 12px; font-weight: 600; margin-top: 2px; }
 
-    .nav-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; max-width: 1400px; margin: 0 auto; overflow-x: auto; }
-    .tab-btn { background: none; border: none; padding: 14px 18px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
-    .tab-btn:hover { color: var(--primary); }
-    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
-    .tab-count { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; gap: 8px; background: var(--surface); padding: 6px 24px 0; max-width: 1400px; margin: 10px auto 0; border-bottom: 2px solid var(--border); overflow-x: auto; }
+    .tab-btn { background: none; border: none; padding: 12px 18px; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .tab-btn:hover { color: var(--primary); background: #F8FAFC; border-radius: 8px 8px 0 0; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); border-radius: 8px 8px 0 0; }
+    .tab-count { background: #E2E8F0; color: #475569; font-size: 11px; padding: 2px 7px; border-radius: 999px; }
     .tab-btn.active .tab-count { background: var(--primary); color: white; }
 
-    .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
+    /* Main Container */
+    .container { max-width: 1400px; margin: 20px auto; padding: 0 24px; }
     .panel-section { display: none; }
     .panel-section.active { display: block; }
-    
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 24px; }
-    .card-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
-    th { background: #F1F5F9; color: var(--muted); text-align: left; padding: 10px 14px; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
-    td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:hover td { background: #F8FAFC; }
-    
-    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-    .badge-approved { background: #DCFCE7; color: #15803D; }
-    .badge-pending { background: #FEF3C7; color: #B45309; }
-    .badge-rejected { background: #FEE2E2; color: #B91C1C; }
-    .badge-lead { background: #E0E7FF; color: #4338CA; }
-    .badge-kyc-yes { background: #D1FAE5; color: #065F46; }
-    .badge-kyc-no { background: #F3F4F6; color: #6B7280; }
-    
-    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: opacity 0.2s; }
-    .btn:hover { opacity: 0.85; }
-    .btn-approve { background: #16A34A; color: white; }
-    .btn-reject { background: #DC2626; color: white; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
-    .btn-contact { background: #0284C7; color: white; }
-    
-    .search-box { width: 100%; max-width: 400px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-bottom: 16px; outline: none; }
-    .search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
-    
-    .banner-notice { background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #92400E; }
+
+    /* Policy Notice */
+    .banner-notice { background: #FFFBEB; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #92400E; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .banner-notice strong { color: #78350F; }
 
-    .fee-badge { background: #FEF3C7; color: #92400E; font-weight: 800; font-size: 11px; padding: 4px 8px; border-radius: 4px; border: 1px dashed #F59E0B; }
-    .mono { font-family: monospace; font-size: 12px; color: #334155; }
-    .map-link { color: #0284C7; text-decoration: none; font-weight: 600; }
-    .map-link:hover { text-decoration: underline; }
+    /* Cards & Tables */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 24px; }
+    .card-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .card-title { font-size: 17px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    
+    .search-input { padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; width: 300px; max-width: 100%; }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,90,71,0.12); }
 
-    /* Login Modal Overlay */
-    #admin-login-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(15, 23, 42, 0.94);
-      backdrop-filter: blur(8px);
-      z-index: 10000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .login-card {
-      background: white;
-      border-radius: 16px;
-      padding: 36px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      border: 1px solid #E2E8F0;
-    }
-    .login-badge {
-      display: inline-block;
-      background: #EBF7F3;
-      color: #0F5A47;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 999px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .login-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #0F172A;
-      margin-bottom: 6px;
-    }
-    .login-sub {
-      font-size: 13px;
-      color: #64748B;
-      margin-bottom: 24px;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: #334155;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1px solid #CBD5E1;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus {
-      border-color: #0F5A47;
-      box-shadow: 0 0 0 3px rgba(15, 90, 71, 0.15);
-    }
-    .btn-login-submit {
-      width: 100%;
-      padding: 12px;
-      background: #0F5A47;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-login-submit:hover {
-      background: #073B2E;
-    }
-    .login-error {
-      background: #FEE2E2;
-      color: #B91C1C;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      margin-bottom: 16px;
-      display: none;
-      border: 1px solid #FCA5A5;
-      font-weight: 600;
-    }
-    .login-hint {
-      font-size: 11px;
-      color: #94A3B8;
-      text-align: center;
-      margin-top: 16px;
-      line-height: 1.4;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #F8FAFC; color: var(--muted); text-align: left; padding: 12px 14px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+    td { padding: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: #F8FAFC; }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-pending { background: #FEF3C7; color: #B45309; }
+    .badge-approved { background: #DCFCE7; color: #15803D; }
+    .badge-rejected { background: #FEE2E2; color: #B91C1C; }
+    .badge-available { background: #DCFCE7; color: #166534; }
+    .badge-rented { background: #E2E8F0; color: #475569; }
+    .badge-sold { background: #EDE9FE; color: #6D28D9; }
+    .badge-full { background: #E0F2FE; color: #0369A1; }
+    .badge-kyc-yes { background: #DCFCE7; color: #15803D; }
+    .badge-kyc-no { background: #F3F4F6; color: #6B7280; }
+
+    /* Action Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; transition: opacity 0.15s, transform 0.1s; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-approve { background: var(--success); color: white; }
+    .btn-reject { background: var(--danger); color: white; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+    .btn-edit { background: #EEF2F6; color: #1E293B; border: 1px solid #CBD5E1; }
+    .btn-mark-rented { background: #475569; color: white; }
+    .btn-mark-sold { background: var(--purple); color: white; }
+    .btn-mark-full { background: var(--info); color: white; }
+    .btn-relist { background: #059669; color: white; }
+
+    .confidential-box { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #166534; }
+    .confidential-box strong { color: #14532D; }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
+    .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .form-full { grid-column: span 2; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px; outline: none; }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(15,90,71,0.15); }
+
+    /* Toast Notification */
+    #toast-msg { position: fixed; bottom: 24px; right: 24px; background: #0F172A; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 100000; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border-left: 4px solid #22C55E; }
   </style>
 </head>
 <body>
 
   <!-- ADMIN LOGIN OVERLAY -->
-  <div id=admin-login-overlay>
-    <div class=login-card>
+  <div id="admin-login-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); z-index: 10000; display: flex; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: white; border-radius: 16px; padding: 36px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
       <div style="text-align: center; margin-bottom: 16px;">
-        <span style="font-size: 36px;">🔐</span>
+        <span style="font-size: 38px;">🔐</span>
       </div>
-      <span class="login-badge">Protected Console</span>
-      <h2 class="login-title">Brajvaas Admin Login</h2>
-      <p class="login-sub">Enter administrator credentials to access the moderation console and user audit logs.</p>
+      <span style="background: #EBF7F3; color: #0F5A47; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; text-transform: uppercase;">Central Administrator</span>
+      <h2 style="font-size: 22px; font-weight: 800; color: #0F172A; margin: 8px 0 4px;">Brajvaas Admin Login</h2>
+      <p style="font-size: 13px; color: #64748B; margin-bottom: 20px;">Sign in to moderate properties, edit listings, and manage closed deals.</p>
 
-      <div id="login-error-msg" class="login-error"></div>
+      <div id="login-error-msg" style="display: none; background: #FEE2E2; color: #B91C1C; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 14px;"></div>
 
       <form id="adminLoginForm" onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label for="adminUsername">Login ID / Username</label>
-          <input type="text" id="adminUsername" placeholder="e.g. admin" autocomplete="username" required autofocus>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #334155; margin-bottom: 4px; text-transform: uppercase;">Login ID</label>
+          <input type="text" id="adminUsername" class="form-control" placeholder="admin" required autofocus>
         </div>
-        <div class="form-group">
-          <label for="adminPassword">Admin Password</label>
-          <input type="password" id="adminPassword" placeholder="Enter password" autocomplete="current-password" required>
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #334155; margin-bottom: 4px; text-transform: uppercase;">Password</label>
+          <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-login-submit">Authenticate & Enter Console</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; justify-content: center; font-size: 14px;">Authenticate & Enter Console</button>
       </form>
-
-      <div class="login-hint">
-        Default Credentials: <code>admin</code> / <code>Brajvaas@2026</code><br>
-        Change credentials anytime inside the console settings.
-      </div>
+      <div style="font-size: 11px; color: #94A3B8; text-align: center; margin-top: 14px;">Default: <code>admin</code> / <code>Brajvaas@2026</code></div>
     </div>
   </div>
 
-
+  <!-- MAIN TOP HEADER -->
   <header>
     <div class="logo-row">
       <h2 style="font-weight: 800; letter-spacing: -0.5px;">Brajvaas</h2>
-      <span class="badge-live">Web Admin Console</span>
-      <span style="font-size: 12px; color: #94A3B8;">Mathura & Vrindavan Central Portal</span>
+      <span class="logo-badge">Admin Central</span>
+      <span style="font-size: 12px; color: #94A3B8;">Vrindavan & Mathura</span>
     </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-      <a href="/" class="btn btn-outline" style="text-decoration: none; color: white; background: #334155; border: none;">← Client Homepage</a>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="btn btn-reject" onclick="confirmClearAll()" title="Reset and start fresh from beginning">🗑️ Clear All Postings</button>
+      <a href="/brajvaas.apk" class="btn btn-primary" style="background: #0284C7;">📥 Download APK</a>
       <div class="server-pill">
         <span class="indicator"></span>
-        <span id="server-status">Admin Authenticated</span>
+        <span>Live & Syncing</span>
       </div>
-      <button class="btn btn-primary" onclick="refreshData()">Refresh</button>
-      <button class="btn btn-outline" onclick="changeAdminPassword()" style="color: white; border-color: #64748B;">Change Key</button>
-      <button class="btn btn-reject" onclick="logoutAdmin()">Logout</button>
+      <button class="btn btn-outline" onclick="changeAdminPassword()" style="color: white; border-color: #475569;">Change Key</button>
+      <button class="btn btn-outline" onclick="logoutAdmin()" style="color: white; border-color: #475569;">Logout</button>
     </div>
   </header>
 
+  <!-- 5 KEY STATS CARDS -->
   <div class="stats-bar">
-    <div class="stat-card">
-      <div class="stat-title">Total Users</div>
-      <div class="stat-value" id="stat-users">6</div>
-      <div class="stat-sub">Seekers, Landlords & Devotees</div>
+    <div class="stat-card" onclick="switchTab('pending')">
+      <div class="stat-header">
+        <span class="stat-title">Pending Review</span>
+        <span class="stat-icon">📋</span>
+      </div>
+      <div class="stat-value" id="stat-pending" style="color: var(--warning);">0</div>
+      <div class="stat-sub" style="color: var(--warning);">Require Admin Moderation</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Pending Moderation</div>
-      <div class="stat-value" id="stat-pending" style="color: var(--warning);">2</div>
-      <div class="stat-sub">Review User Postings</div>
+
+    <div class="stat-card" onclick="switchTab('live')">
+      <div class="stat-header">
+        <span class="stat-title">Active Live Listings</span>
+        <span class="stat-icon">🏠</span>
+      </div>
+      <div class="stat-value" id="stat-live" style="color: var(--primary);">0</div>
+      <div class="stat-sub" style="color: var(--primary);">Publicly Searchable</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Devotee Interest Leads</div>
-      <div class="stat-value" id="stat-leads" style="color: #4338CA;">4</div>
-      <div class="stat-sub">Likes & Shortlists for Admin Contact</div>
+
+    <div class="stat-card" onclick="switchTab('archived')">
+      <div class="stat-header">
+        <span class="stat-title">Sold / Rented (Archived)</span>
+        <span class="stat-icon">📁</span>
+      </div>
+      <div class="stat-value" id="stat-archived" style="color: var(--purple);">0</div>
+      <div class="stat-sub" style="color: var(--purple);">Closed Deals (Hidden)</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Vrindavan Short Stays</div>
-      <div class="stat-value" id="stat-shortstays" style="color: #0284C7;">3</div>
-      <div class="stat-sub">₹1,200 Fee Collected (₹200 Tenant + ₹200 Host)</div>
+
+    <div class="stat-card" onclick="switchTab('leads')">
+      <div class="stat-header">
+        <span class="stat-title">Inquiries & Leads</span>
+        <span class="stat-icon">💬</span>
+      </div>
+      <div class="stat-value" id="stat-leads" style="color: var(--info);">0</div>
+      <div class="stat-sub" style="color: var(--info);">Devotee Visit Requests</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Location Audit Logs</div>
-      <div class="stat-value" id="stat-locations">7</div>
-      <div class="stat-sub">Exact GPS Coordinates Logged</div>
+
+    <div class="stat-card" onclick="switchTab('agreements')">
+      <div class="stat-header">
+        <span class="stat-title">15-Day Agreements</span>
+        <span class="stat-icon">📜</span>
+      </div>
+      <div class="stat-value" id="stat-agreements" style="color: #D97706;">0</div>
+      <div class="stat-sub" style="color: #D97706;">Mathura Police KYC Active</div>
     </div>
   </div>
 
+  <!-- NAVIGATION TABS -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-    <button class="tab-btn" onclick="switchTab('users')">Users <span class="tab-count" id="count-users">6</span></button>
-    <button class="tab-btn" onclick="switchTab('properties')">Properties <span class="tab-count" id="count-properties">8</span></button>
-    <button class="tab-btn" onclick="switchTab('leads')">Interest Leads (Likes) <span class="tab-count" id="count-leads">4</span></button>
-    <button class="tab-btn" onclick="switchTab('shortstays')">Vrindavan Short Stays <span class="tab-count" id="count-shortstays">3</span></button>
-    <button class="tab-btn" onclick="switchTab('locations')">Exact GPS Logs <span class="tab-count" id="count-locations">7</span></button>
+    <button class="tab-btn active" id="tab-btn-pending" onclick="switchTab('pending')">📋 Pending Queue <span class="tab-count" id="count-pending">0</span></button>
+    <button class="tab-btn" id="tab-btn-live" onclick="switchTab('live')">🏠 Live Active <span class="tab-count" id="count-live">0</span></button>
+    <button class="tab-btn" id="tab-btn-archived" onclick="switchTab('archived')">📁 Sold / Rented (Archived) <span class="tab-count" id="count-archived">0</span></button>
+    <button class="tab-btn" id="tab-btn-leads" onclick="switchTab('leads')">💬 Inquiries & Leads <span class="tab-count" id="count-leads">0</span></button>
+    <button class="tab-btn" id="tab-btn-agreements" onclick="switchTab('agreements')">📜 Agreements & Police KYC <span class="tab-count" id="count-agreements">0</span></button>
+    <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')">👥 Registered Devotees <span class="tab-count" id="count-users">0</span></button>
   </nav>
 
   <div class="container">
     <div class="banner-notice">
-      <strong>Active Policy & Business Rules:</strong>
-      Long-term rentals charge <strong>15 days rent as brokerage</strong> (Rent agreement & police verification managed by Brajvaas).
-      Vrindavan Short Stays & Homestays charge flat <strong>₹200 platform fee</strong> per booking.
-      All user actions (posting, renting, buying, short stays) log <strong>exact GPS coordinates</strong> displayed below.
+      <div>
+        <strong>Admin Control Rules:</strong>
+        All user chats connect to <strong>Brajvaas Dedicated Admin Desk</strong> (poster numbers are protected).
+        Sold/Rented properties are <strong>moved to the Archive tab</strong> and automatically hidden from public seekers.
+      </div>
+      <button class="btn btn-outline" style="background: white;" onclick="seedDemoListing()">+ Post Sample Property to Test</button>
     </div>
 
-    <!-- OVERVIEW TAB -->
-    <div id="tab-overview" class="panel-section active">
+    <!-- 1. PENDING QUEUE TAB -->
+    <div id="tab-pending" class="panel-section active">
       <div class="card">
-        <div class="card-title">
-          <span>Pending Properties Moderation Queue</span>
-          <span class="badge-pending" id="badge-pending-count">2 Require Review</span>
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>Moderation Queue: Review, Edit & Approve</span>
+            <span class="badge badge-pending" id="badge-pending-status">0 Pending</span>
+          </div>
+          <input type="text" class="search-input" placeholder="Search by title, owner, locality..." oninput="filterTable('table-pending', this.value)">
         </div>
-        <table id="table-overview-pending">
+
+        <table id="table-pending">
           <thead>
             <tr>
-              <th>Property Title</th>
-              <th>Owner & Contact</th>
-              <th>Locality</th>
-              <th>Purpose & Brokerage</th>
+              <th>Property Details</th>
+              <th>Confidential Owner Contact</th>
+              <th>Category & Brokerage</th>
               <th>Rent / Price</th>
-              <th>Coordinates</th>
+              <th>Photos</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-pending">
             <tr>
-              <td><strong>Radha Rani Kunj 2BHK</strong><br><small style="color:var(--muted);">Near ISKCON Temple (700m)</small></td>
-              <td>Gopal Sharma<br><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td>Raman Reti, Vrindavan</td>
-              <td><span class="fee-badge">Rent (15-Day Brokerage)</span></td>
-              <td><strong>₹18,500/mo</strong></td>
-              <td class="mono">27.5794° N, 77.6881° E</td>
-              <td>
-                <button class="btn btn-approve" onclick="alert('Property Approved!')">Approve</button>
-                <button class="btn btn-reject" onclick="alert('Feedback sent to owner')">Reject</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Braj Gopika Studio Apartment</strong><br><small style="color:var(--muted);">Near Prem Mandir (1.1 km)</small></td>
-              <td>Radha Charan Das<br><a href="tel:+919823456780" class="map-link">+91 98234 56780</a></td>
-              <td>Chhatikara Road, Vrindavan</td>
-              <td><span class="fee-badge">Short Stay (₹200 Fee)</span></td>
-              <td><strong>₹1,800/night</strong></td>
-              <td class="mono">27.5812° N, 77.6795° E</td>
-              <td>
-                <button class="btn btn-approve" onclick="alert('Property Approved!')">Approve</button>
-                <button class="btn btn-reject" onclick="alert('Feedback sent to owner')">Reject</button>
+              <td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">
+                🎉 All caught up! No pending properties awaiting moderation.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </div>
 
+    <!-- 2. LIVE ACTIVE PROPERTIES TAB -->
+    <div id="tab-live" class="panel-section">
       <div class="card">
-        <div class="card-title">
-          <span>Recent User Interest Leads (Devotees Who Liked Properties)</span>
-          <a href="#" onclick="switchTab('leads')" class="map-link">View All Leads →</a>
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>Live Approved Properties (Visible to Seekers)</span>
+            <span class="badge badge-approved" id="badge-live-status">0 Live</span>
+          </div>
+          <input type="text" class="search-input" placeholder="Search live listings..." oninput="filterTable('table-live', this.value)">
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Devotee Name</th>
-              <th>Contact</th>
-              <th>Interested In</th>
-              <th>Rent/Price</th>
-              <th>Exact Location</th>
-              <th>Status</th>
-              <th>Admin Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Mukesh Garg</strong></td>
-              <td><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td>Prem Mandir View Devotee Flat<br><small style="color:var(--muted);">Chhatikara Road, Vrindavan</small></td>
-              <td>₹16,000/mo</td>
-              <td class="mono">27.5794° N, 77.6881° E</td>
-              <td><span class="status-badge badge-lead">New Interest Lead</span></td>
-              <td><button class="btn btn-contact" onclick="alert('Contacting Mukesh Garg...')">Mark Contacted</button></td>
-            </tr>
-            <tr>
-              <td><strong>Sunita Agarwal</strong></td>
-              <td><a href="tel:+919811223344" class="map-link">+91 98112 23344</a></td>
-              <td>Bankey Bihari Parikrama Homestay<br><small style="color:var(--muted);">VIP Road, Vrindavan</small></td>
-              <td>₹2,200/night</td>
-              <td class="mono">27.5843° N, 77.7011° E</td>
-              <td><span class="status-badge badge-lead">Discussion in Progress</span></td>
-              <td><button class="btn btn-contact" onclick="alert('Initiating Police Verification')">Initiate Agreement</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- USERS TAB -->
-    <div id="tab-users" class="panel-section">
-      <div class="card">
-        <div class="card-title">User Management</div>
-        <input type="text" id="userSearch" class="search-box" placeholder="Search user by name, phone, email, or locality..." onkeyup="filterUsers()">
-        <table id="usersTable">
+        <table id="table-live">
           <thead>
             <tr>
-              <th>User Name</th>
-              <th>Role</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>City</th>
-              <th>KYC Verified</th>
-              <th>Exact GPS Coordinates</th>
+              <th>Property</th>
+              <th>Confidential Owner Contact</th>
+              <th>Price / Rent</th>
+              <th>Status Badge</th>
+              <th>Manage Deal (Mark Sold/Rented)</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-live">
             <tr>
-              <td><strong>Mukesh Garg</strong></td>
-              <td><span class="status-badge badge-lead">SEEKER</span></td>
-              <td><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td>mukgarg11@gmail.com</td>
-              <td>Vrindavan</td>
-              <td><span class="status-badge badge-kyc-yes">Verified</span></td>
-              <td class="mono">27.5794° N, 77.6881° E<br><small style="color:var(--muted);">Raman Reti, Vrindavan</small></td>
-              <td><button class="btn btn-outline" onclick="alert('KYC Updated')">Toggle KYC</button></td>
-            </tr>
-            <tr>
-              <td><strong>Govind Das Landlord</strong></td>
-              <td><span class="status-badge badge-lead">LANDLORD</span></td>
-              <td><a href="tel:+919829988776" class="map-link">+91 98299 88776</a></td>
-              <td>govind.braj@brajvaas.in</td>
-              <td>Mathura</td>
-              <td><span class="status-badge badge-kyc-yes">Verified</span></td>
-              <td class="mono">27.4924° N, 77.6737° E<br><small style="color:var(--muted);">Krishna Nagar, Mathura</small></td>
-              <td><button class="btn btn-outline" onclick="alert('KYC Updated')">Toggle KYC</button></td>
-            </tr>
-            <tr>
-              <td><strong>Radha Charan Host</strong></td>
-              <td><span class="status-badge badge-lead">LANDLORD</span></td>
-              <td><a href="tel:+919823456780" class="map-link">+91 98234 56780</a></td>
-              <td>radha.charan@brajvaas.in</td>
-              <td>Vrindavan</td>
-              <td><span class="status-badge badge-kyc-yes">Verified</span></td>
-              <td class="mono">27.5812° N, 77.6795° E<br><small style="color:var(--muted);">Sunrakh Road, Vrindavan</small></td>
-              <td><button class="btn btn-outline" onclick="alert('KYC Updated')">Toggle KYC</button></td>
-            </tr>
-            <tr>
-              <td><strong>Vrindavan Devotee Guest</strong></td>
-              <td><span class="status-badge badge-lead">SEEKER</span></td>
-              <td><a href="tel:+919811223344" class="map-link">+91 98112 23344</a></td>
-              <td>devotee.guest@brajvaas.in</td>
-              <td>Delhi (Visiting Vrindavan)</td>
-              <td><span class="status-badge badge-kyc-yes">Verified</span></td>
-              <td class="mono">27.5843° N, 77.7011° E<br><small style="color:var(--muted);">Bankey Bihari Parikrama Marg</small></td>
-              <td><button class="btn btn-outline" onclick="alert('KYC Updated')">Toggle KYC</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PROPERTIES TAB -->
-    <div id="tab-properties" class="panel-section">
-      <div class="card">
-        <div class="card-title">Property Listings Moderation</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Owner</th>
-              <th>Type / Policy</th>
-              <th>Locality</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Exact GPS</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Prem Mandir View Devotee Flat</strong><br><small style="color:var(--muted);">Near Prem Mandir (800m)</small></td>
-              <td>Govind Das<br><a href="tel:+919829988776" class="map-link">+91 98299 88776</a></td>
-              <td><span class="fee-badge">Rent (15d Fee)</span></td>
-              <td>Chhatikara Road, Vrindavan</td>
-              <td>₹16,000/mo</td>
-              <td><span class="status-badge badge-approved">APPROVED</span></td>
-              <td class="mono">27.5794° N, 77.6881° E</td>
-              <td><button class="btn btn-outline" onclick="alert('Status updated')">Revoke</button></td>
-            </tr>
-            <tr>
-              <td><strong>Radha Rani Kunj 2BHK</strong><br><small style="color:var(--muted);">Near ISKCON Temple (700m)</small></td>
-              <td>Gopal Sharma<br><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td><span class="fee-badge">Rent (15d Fee)</span></td>
-              <td>Raman Reti, Vrindavan</td>
-              <td>₹18,500/mo</td>
-              <td><span class="status-badge badge-pending">PENDING</span></td>
-              <td class="mono">27.5794° N, 77.6881° E</td>
-              <td>
-                <button class="btn btn-approve" onclick="alert('Approved!')">Approve</button>
-                <button class="btn btn-reject" onclick="alert('Rejected')">Reject</button>
+              <td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">
+                No active live listings right now. Post from app or approve pending listings.
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. ARCHIVED: SOLD / RENTED / FULL TAB -->
+    <div id="tab-archived" class="panel-section">
+      <div class="card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>Archived Deals (Sold, Rented Out & Fully Booked)</span>
+            <span class="badge" style="background:#E2E8F0; color:#475569;" id="badge-archived-status">0 Closed Deals</span>
+          </div>
+          <input type="text" class="search-input" placeholder="Search archive..." oninput="filterTable('table-archived', this.value)">
+        </div>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 14px;">
+          🔒 Private to Admin: These properties have been closed and are hidden from all search feeds. You can re-activate any property at any time.
+        </p>
+
+        <table id="table-archived">
+          <thead>
             <tr>
-              <td><strong>Braj Gopika Studio Homestay</strong><br><small style="color:var(--muted);">Near Bankey Bihari (1.2 km)</small></td>
-              <td>Radha Charan Das<br><a href="tel:+919823456780" class="map-link">+91 98234 56780</a></td>
-              <td><span class="fee-badge">Short Stay (₹200 Fee)</span></td>
-              <td>Sunrakh Road, Vrindavan</td>
-              <td>₹1,800/night</td>
-              <td><span class="status-badge badge-approved">APPROVED</span></td>
-              <td class="mono">27.5812° N, 77.6795° E</td>
-              <td><button class="btn btn-outline" onclick="alert('Listing active')">Active</button></td>
+              <th>Property</th>
+              <th>Confidential Owner</th>
+              <th>Category</th>
+              <th>Closed Status</th>
+              <th>Closed Timestamp</th>
+              <th>Re-list Action</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-archived">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">
+                No sold or rented-out properties in archive yet.
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- LEADS TAB -->
+    <!-- 4. INQUIRIES & LEADS TAB -->
     <div id="tab-leads" class="panel-section">
       <div class="card">
-        <div class="card-title">User Interest Leads (Devotees Who Liked Properties)</div>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">When any user likes or shortlists a property, their interest appears here immediately so admin can contact them for agreement and police verification.</p>
-        <table>
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>Devotee Inquiries & Assisted Darshan Requests</span>
+          </div>
+        </div>
+        <table id="table-leads">
           <thead>
             <tr>
               <th>Devotee Name</th>
-              <th>Phone</th>
-              <th>Property Liked</th>
-              <th>Locality</th>
-              <th>Rent / Price</th>
-              <th>Exact Location</th>
+              <th>Phone & City</th>
+              <th>Property Title</th>
+              <th>Lead Type</th>
+              <th>Exact GPS Coordinates</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-leads">
             <tr>
               <td><strong>Mukesh Garg</strong></td>
-              <td><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td>Prem Mandir View Devotee Flat</td>
-              <td>Chhatikara Road, Vrindavan</td>
-              <td>₹16,000</td>
-              <td class="mono">27.5794° N, 77.6881° E</td>
-              <td><span class="status-badge badge-lead">New Lead</span></td>
-              <td>
-                <button class="btn btn-contact" onclick="alert('Marked Contacted')">Mark Contacted</button>
-                <button class="btn btn-approve" onclick="alert('Agreement Initiated')">Initiate Agreement</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Sunita Agarwal</strong></td>
-              <td><a href="tel:+919811223344" class="map-link">+91 98112 23344</a></td>
-              <td>Bankey Bihari Parikrama Homestay</td>
-              <td>VIP Road, Vrindavan</td>
-              <td>₹2,200</td>
-              <td class="mono">27.5843° N, 77.7011° E</td>
-              <td><span class="status-badge badge-lead">Contacted</span></td>
-              <td>
-                <button class="btn btn-approve" onclick="alert('Police Verification Initiated')">Police Verification</button>
-              </td>
+              <td>+91 98765 43210 (Vrindavan)</td>
+              <td>2 BHK Spiritual Ashram Flat (Raman Reti)</td>
+              <td><span class="badge badge-pending">Assisted Darshan Visit</span></td>
+              <td>27.5794° N, 77.6881° E</td>
+              <td><span class="badge badge-approved">Contacted</span></td>
+              <td><a href="tel:+919876543210" class="btn btn-outline">Call Devotee</a></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- SHORT STAYS TAB -->
-    <div id="tab-shortstays" class="panel-section">
+    <!-- 5. AGREEMENTS & POLICE KYC TAB -->
+    <div id="tab-agreements" class="panel-section">
       <div class="card">
-        <div class="card-title">
-          <span>Vrindavan Short Stays & Homestays</span>
-          <span class="fee-badge">₹200 Flat Platform Fee</span>
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>15-Day Tenancy Agreements & UP Police KYC Tracker</span>
+          </div>
         </div>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Exclusive to Vrindavan locality. Irrespective of stay duration, Brajvaas calculates a flat ₹200 platform fee upon booking.</p>
         <table>
           <thead>
             <tr>
-              <th>Homestay Title</th>
-              <th>Guest Name & Phone</th>
-              <th>Dates</th>
-              <th>Guests</th>
-              <th>Tenant Fee</th>
-              <th>Landlord Fee</th>
-              <th>Total Platform Fee</th>
-              <th>Status</th>
+              <th>Agreement ID</th>
+              <th>Tenant & Landlord</th>
+              <th>Property</th>
+              <th>15-Day Brokerage</th>
+              <th>E-Stamp Draft</th>
+              <th>Police Verification</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Braj Gopika Studio Homestay</strong><br><small style="color:var(--muted);">Sunrakh Road, Vrindavan</small></td>
-              <td>Mukesh Garg<br><a href="tel:+919876543210" class="map-link">+91 98765 43210</a></td>
-              <td>15 Oct to 18 Oct 2026</td>
-              <td>3 Devotees</td>
-              <td><strong style="color:var(--primary);">₹200</strong></td>
-              <td><strong style="color:var(--primary);">₹200</strong></td>
-              <td><span class="fee-badge">₹400 Platform Fee</span></td>
-              <td><span class="status-badge badge-approved">CONFIRMED</span></td>
-            </tr>
-            <tr>
-              <td><strong>Radha Govind Dham Homestay</strong><br><small style="color:var(--muted);">Parikrama Marg, Vrindavan</small></td>
-              <td>Sunita Agarwal<br><a href="tel:+919811223344" class="map-link">+91 98112 23344</a></td>
-              <td>20 Oct to 22 Oct 2026</td>
-              <td>2 Devotees</td>
-              <td><strong style="color:var(--primary);">₹200</strong></td>
-              <td><strong style="color:var(--primary);">₹200</strong></td>
-              <td><span class="fee-badge">₹400 Platform Fee</span></td>
-              <td><span class="status-badge badge-approved">CONFIRMED</span></td>
+              <td><strong>#AGR-VRN-8802</strong></td>
+              <td>Gopal Das ↔ Radhika Kunj Trust</td>
+              <td>2 BHK Ashram Flat, Raman Reti</td>
+              <td><strong style="color:var(--primary);">₹8,250 (15 Days)</strong></td>
+              <td><span class="badge badge-approved">Stamp Executed</span></td>
+              <td><span class="badge badge-approved">Mathura Police Cleared</span></td>
+              <td><button class="btn btn-outline" onclick="showToast('Official PDF agreement dispatched')">View Draft</button></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- EXACT LOCATION LOGS TAB -->
-    <div id="tab-locations" class="panel-section">
+    <!-- 6. REGISTERED DEVOTEES TAB -->
+    <div id="tab-users" class="panel-section">
       <div class="card">
-        <div class="card-title">
-          <span>Exact User Location Audit Logs</span>
-          <span class="badge-live">7 Logged Events</span>
+        <div class="card-header-row">
+          <div class="card-title">
+            <span>Registered Devotees & GPS Audit Logs</span>
+          </div>
         </div>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Mandatory security & fraud prevention audit: Logs exact latitude & longitude of users whosoever posts, takes on rent, buys, or books short stays.</p>
         <table>
           <thead>
             <tr>
               <th>User Name</th>
-              <th>Action Type</th>
-              <th>Locality</th>
-              <th>Exact GPS Coordinates</th>
-              <th>Details</th>
-              <th>Map Pin</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>City</th>
+              <th>Last Logged Coordinates</th>
+              <th>KYC Status</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><strong>Mukesh Garg</strong></td>
-              <td><span class="status-badge badge-lead">POSTING</span></td>
-              <td>Raman Reti, Vrindavan</td>
-              <td class="mono"><strong>27.5794° N, 77.6881° E</strong></td>
-              <td>Posted property listing for rent</td>
-              <td><a href="https://maps.google.com/?q=27.5794,77.6881" target="_blank" class="map-link">View Google Maps ↗</a></td>
-            </tr>
-            <tr>
-              <td><strong>Govind Das</strong></td>
-              <td><span class="status-badge badge-lead">RENT_AGREEMENT</span></td>
-              <td>Krishna Nagar, Mathura</td>
-              <td class="mono"><strong>27.4924° N, 77.6737° E</strong></td>
-              <td>Drafted 11-month rent agreement & police verification</td>
-              <td><a href="https://maps.google.com/?q=27.4924,77.6737" target="_blank" class="map-link">View Google Maps ↗</a></td>
-            </tr>
-            <tr>
-              <td><strong>Radha Charan Das</strong></td>
-              <td><span class="status-badge badge-lead">SHORT_STAY_BOOKING</span></td>
-              <td>Sunrakh Road, Vrindavan</td>
-              <td class="mono"><strong>27.5812° N, 77.6795° E</strong></td>
-              <td>Confirmed Vrindavan Homestay short stay booking</td>
-              <td><a href="https://maps.google.com/?q=27.5812,77.6795" target="_blank" class="map-link">View Google Maps ↗</a></td>
-            </tr>
-            <tr>
-              <td><strong>Sunita Agarwal</strong></td>
-              <td><span class="status-badge badge-lead">PURCHASE_INTEREST</span></td>
-              <td>Vrindavan Parikrama Marg</td>
-              <td class="mono"><strong>27.5843° N, 77.7011° E</strong></td>
-              <td>Inquired for purchasing temple villa</td>
-              <td><a href="https://maps.google.com/?q=27.5843,77.7011" target="_blank" class="map-link">View Google Maps ↗</a></td>
+              <td>+91 98765 43210</td>
+              <td><span class="badge badge-approved">Seeker</span></td>
+              <td>Vrindavan</td>
+              <td style="font-family: monospace;">27.5794° N, 77.6881° E</td>
+              <td><span class="badge badge-kyc-yes">KYC Verified</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
   </div>
 
+  <!-- EDIT PROPERTY MODAL -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Property Posting</h3>
+        <button class="close-btn" onclick="closeEditModal()">✕</button>
+      </div>
+
+      <form id="editPropertyForm" onsubmit="savePropertyEdit(event)">
+        <input type="hidden" id="edit-prop-id">
+        
+        <div class="form-grid">
+          <div class="form-full">
+            <label class="form-label">Listing Title</label>
+            <input type="text" id="edit-title" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label">Price / Rent (₹)</label>
+            <input type="number" id="edit-price" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label">BHK / Room Type</label>
+            <input type="text" id="edit-bhk" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label">Locality / Sector</label>
+            <input type="text" id="edit-locality" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label">Super Built-up Area (sq.ft)</label>
+            <input type="number" id="edit-area" class="form-control" required>
+          </div>
+
+          <div class="form-full">
+            <label class="form-label">Full Address (Strictly Confidential)</label>
+            <input type="text" id="edit-address" class="form-control" required>
+          </div>
+
+          <div class="form-full">
+            <label class="form-label">Nearby Landmark (e.g. 400m from Prem Mandir)</label>
+            <input type="text" id="edit-landmark" class="form-control">
+          </div>
+
+          <div class="form-full">
+            <div class="confidential-box">
+              🔒 <strong>Confidential Landlord Contact (Protected):</strong>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label">Owner Full Name</label>
+            <input type="text" id="edit-owner-name" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label">Owner Phone Number</label>
+            <input type="text" id="edit-owner-phone" class="form-control" required>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="padding: 9px 18px;">Save All Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-msg"></div>
+
   <script>
-    function switchTab(tabId) {
+    // In-memory / LocalStorage Database
+    let properties = [];
+
+    // Load initial data
+    async function initDatabase() {
+      // 1. Try fetching from live app backend if running under embedded server or proxy
+      try {
+        const res = await fetch('/api/data');
+        if (res.ok) {
+          const snapshot = await res.json();
+          if (snapshot && Array.isArray(snapshot.properties)) {
+            properties = snapshot.properties;
+            localStorage.setItem('brajvaas_admin_properties', JSON.stringify(properties));
+            renderAll();
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback to localStorage for standalone browser deployment
+      }
+
+      const saved = localStorage.getItem('brajvaas_admin_properties');
+      if (saved) {
+        try {
+          properties = JSON.parse(saved);
+        } catch(e) {
+          properties = [];
+        }
+      } else {
+        properties = []; // Starts fresh from beginning!
+      }
+      renderAll();
+    }
+
+    function saveDatabase() {
+      localStorage.setItem('brajvaas_admin_properties', JSON.stringify(properties));
+      renderAll();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast-msg');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    // Switch Tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
-      
-      const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase().includes(tabId));
+
+      const targetPanel = document.getElementById('tab-' + tabName);
+      const targetBtn = document.getElementById('tab-btn-' + tabName);
+      if (targetPanel) targetPanel.classList.add('active');
       if (targetBtn) targetBtn.classList.add('active');
-      
-      const targetSection = document.getElementById('tab-' + tabId);
-      if (targetSection) targetSection.classList.add('active');
     }
 
-    function refreshData() {
-      fetch('/api/data')
-        .then(res => res.json())
-        .then(data => {
-          alert('Data refreshed from live local server!');
-          location.reload();
-        })
-        .catch(() => {
-          location.reload();
+    // Render Tables
+    function renderAll() {
+      const pending = properties.filter(p => p.approvalStatus === 'PENDING_APPROVAL');
+      const live = properties.filter(p => p.approvalStatus === 'APPROVED' && (!p.availabilityStatus || p.availabilityStatus === 'AVAILABLE'));
+      const archived = properties.filter(p => p.availabilityStatus && p.availabilityStatus !== 'AVAILABLE');
+
+      // Update counters
+      document.getElementById('stat-pending').innerText = pending.length;
+      document.getElementById('count-pending').innerText = pending.length;
+      document.getElementById('badge-pending-status').innerText = pending.length + ' Pending';
+
+      document.getElementById('stat-live').innerText = live.length;
+      document.getElementById('count-live').innerText = live.length;
+      document.getElementById('badge-live-status').innerText = live.length + ' Live';
+
+      document.getElementById('stat-archived').innerText = archived.length;
+      document.getElementById('count-archived').innerText = archived.length;
+      document.getElementById('badge-archived-status').innerText = archived.length + ' Closed';
+
+      // 1. Render Pending
+      const tbodyPending = document.getElementById('tbody-pending');
+      if (pending.length === 0) {
+        tbodyPending.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">🎉 All caught up! No pending properties awaiting moderation.</td></tr>`;
+      } else {
+        tbodyPending.innerHTML = pending.map(p => `
+          <tr>
+            <td>
+              <strong>${escapeHtml(p.title)}</strong><br>
+              <small style="color:var(--muted);">${p.bhk} • ${escapeHtml(p.locality)}, ${escapeHtml(p.city)}</small>
+            </td>
+            <td>
+              <div class="confidential-box">
+                <strong>${escapeHtml(p.ownerName)}</strong><br>
+                <a href="tel:${escapeHtml(p.ownerPhone)}" style="color:var(--primary); font-weight:700;">${escapeHtml(p.ownerPhone)}</a>
+              </div>
+            </td>
+            <td><span class="badge" style="background:#EBF7F3; color:#0F5A47;">${p.listingType} (15 Days)</span></td>
+            <td><strong>₹${Number(p.price).toLocaleString('en-IN')}</strong></td>
+            <td><span class="badge" style="background:#F1F5F9; color:#475569;">📷 ${p.photos ? p.photos.length : 3} Photos</span></td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-edit" onclick="openEditModal('${p.id}')">✏️ Edit</button>
+                <button class="btn btn-approve" onclick="approveProperty('${p.id}')">Approve</button>
+                <button class="btn btn-reject" onclick="rejectProperty('${p.id}')">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // 2. Render Live
+      const tbodyLive = document.getElementById('tbody-live');
+      if (live.length === 0) {
+        tbodyLive.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">No active live listings right now. Post from app or approve pending listings.</td></tr>`;
+      } else {
+        tbodyLive.innerHTML = live.map(p => `
+          <tr>
+            <td>
+              <strong>${escapeHtml(p.title)}</strong><br>
+              <small style="color:var(--muted);">${p.bhk} • ${escapeHtml(p.locality)}, ${escapeHtml(p.city)}</small>
+            </td>
+            <td>
+              <div class="confidential-box">
+                <strong>${escapeHtml(p.ownerName)}</strong><br>
+                <a href="tel:${escapeHtml(p.ownerPhone)}" style="color:var(--primary); font-weight:700;">${escapeHtml(p.ownerPhone)}</a>
+              </div>
+            </td>
+            <td><strong style="color:var(--primary);">₹${Number(p.price).toLocaleString('en-IN')}</strong></td>
+            <td><span class="badge badge-available">Live Available</span></td>
+            <td>
+              ${p.listingType === 'RENT' 
+                ? `<button class="btn btn-mark-rented" onclick="markAvailability('${p.id}', 'RENTED_OUT')">🏷️ Mark Rented Out</button>`
+                : p.listingType === 'SELL'
+                ? `<button class="btn btn-mark-sold" onclick="markAvailability('${p.id}', 'SOLD')">🏷️ Mark as Sold</button>`
+                : `<button class="btn btn-mark-full" onclick="markAvailability('${p.id}', 'FULLY_BOOKED')">🏷️ Mark as Full</button>`}
+            </td>
+            <td>
+              <button class="btn btn-edit" onclick="openEditModal('${p.id}')">✏️ Edit</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // 3. Render Archived
+      const tbodyArchived = document.getElementById('tbody-archived');
+      if (archived.length === 0) {
+        tbodyArchived.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">No sold or rented-out properties in archive yet.</td></tr>`;
+      } else {
+        tbodyArchived.innerHTML = archived.map(p => `
+          <tr>
+            <td>
+              <strong>${escapeHtml(p.title)}</strong><br>
+              <small style="color:var(--muted);">${p.bhk} • ${escapeHtml(p.locality)}, ${escapeHtml(p.city)}</small>
+            </td>
+            <td>
+              <strong>${escapeHtml(p.ownerName)}</strong> (${escapeHtml(p.ownerPhone)})
+            </td>
+            <td><span class="badge" style="background:#F1F5F9; color:#475569;">${p.listingType}</span></td>
+            <td>
+              ${p.availabilityStatus === 'RENTED_OUT' 
+                ? '<span class="badge badge-rented">Rented Out</span>'
+                : p.availabilityStatus === 'SOLD'
+                ? '<span class="badge badge-sold">Sold</span>'
+                : '<span class="badge badge-full">Fully Booked</span>'}
+            </td>
+            <td><small style="color:var(--muted);">${p.closedAt ? new Date(p.closedAt).toLocaleDateString() : 'Recently'}</small></td>
+            <td>
+              <button class="btn btn-relist" onclick="markAvailability('${p.id}', 'AVAILABLE')">🔄 Re-list Live</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Actions
+    function approveProperty(id) {
+      const prop = properties.find(p => p.id === id);
+      if (prop) {
+        prop.approvalStatus = 'APPROVED';
+        prop.availabilityStatus = 'AVAILABLE';
+        saveDatabase();
+        fetch('/api/approve?id=' + encodeURIComponent(id)).catch(() => {});
+        showToast(`Listing '${prop.title}' is now approved and live for seekers!`);
+      }
+    }
+
+    function rejectProperty(id) {
+      const reason = prompt('Reason for rejection (e.g. MVDA layout needed):', 'Documents require verification');
+      if (reason !== null) {
+        const prop = properties.find(p => p.id === id);
+        if (prop) {
+          prop.approvalStatus = 'REJECTED';
+          prop.adminFeedback = reason;
+          saveDatabase();
+          fetch('/api/reject?id=' + encodeURIComponent(id) + '&reason=' + encodeURIComponent(reason)).catch(() => {});
+          showToast('Property rejected with note sent to owner.');
+        }
+      }
+    }
+
+    function markAvailability(id, newStatus) {
+      const prop = properties.find(p => p.id === id);
+      if (prop) {
+        prop.availabilityStatus = newStatus;
+        prop.closedAt = (newStatus !== 'AVAILABLE') ? Date.now() : null;
+        saveDatabase();
+        fetch('/api/mark-availability?id=' + encodeURIComponent(id) + '&status=' + encodeURIComponent(newStatus)).catch(() => {});
+        const label = newStatus === 'RENTED_OUT' ? 'Rented Out' : newStatus === 'SOLD' ? 'Sold' : newStatus === 'FULLY_BOOKED' ? 'Full' : 'Available';
+        showToast(`Property marked as ${label}. Moved to archive.`);
+      }
+    }
+
+    // Edit Property Modal
+    function openEditModal(id) {
+      const prop = properties.find(p => p.id === id);
+      if (!prop) return;
+      document.getElementById('edit-prop-id').value = prop.id;
+      document.getElementById('edit-title').value = prop.title || '';
+      document.getElementById('edit-price').value = prop.price || '';
+      document.getElementById('edit-bhk').value = prop.bhk || '';
+      document.getElementById('edit-locality').value = prop.locality || '';
+      document.getElementById('edit-area').value = prop.builtUpAreaSqFt || '';
+      document.getElementById('edit-address').value = prop.fullAddress || '';
+      document.getElementById('edit-landmark').value = prop.landmark || '';
+      document.getElementById('edit-owner-name').value = prop.ownerName || '';
+      document.getElementById('edit-owner-phone').value = prop.ownerPhone || '';
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    function savePropertyEdit(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-prop-id').value;
+      const prop = properties.find(p => p.id === id);
+      if (prop) {
+        prop.title = document.getElementById('edit-title').value;
+        prop.price = Number(document.getElementById('edit-price').value);
+        prop.bhk = document.getElementById('edit-bhk').value;
+        prop.locality = document.getElementById('edit-locality').value;
+        prop.builtUpAreaSqFt = Number(document.getElementById('edit-area').value);
+        prop.fullAddress = document.getElementById('edit-address').value;
+        prop.landmark = document.getElementById('edit-landmark').value;
+        prop.ownerName = document.getElementById('edit-owner-name').value;
+        prop.ownerPhone = document.getElementById('edit-owner-phone').value;
+        saveDatabase();
+        const q = new URLSearchParams({
+          id: prop.id,
+          title: prop.title,
+          price: prop.price,
+          bhk: prop.bhk,
+          locality: prop.locality,
+          builtUpAreaSqFt: prop.builtUpAreaSqFt,
+          fullAddress: prop.fullAddress,
+          landmark: prop.landmark,
+          ownerName: prop.ownerName,
+          ownerPhone: prop.ownerPhone
         });
+        fetch('/api/edit-property?' + q.toString()).catch(() => {});
+        closeEditModal();
+        showToast('Property details updated successfully.');
+      }
     }
 
-    function filterUsers() {
-      const q = document.getElementById('userSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#usersTable tbody tr');
+    function confirmClearAll() {
+      if (confirm('Are you sure you want to clear all property postings? This will reset all listings so you can start completely fresh.')) {
+        properties = [];
+        saveDatabase();
+        fetch('/api/clear-all').catch(() => {});
+        showToast('All postings cleared! Starting fresh from beginning.');
+      }
+    }
+
+    function seedDemoListing() {
+      const newProp = {
+        id: 'prop_' + Date.now(),
+        title: '2 BHK Sacred Ashram Flat near ISKCON',
+        listingType: 'RENT',
+        locality: 'Raman Reti',
+        city: 'Vrindavan',
+        fullAddress: 'Flat 204, Radha Kunj, Raman Reti, Vrindavan',
+        landmark: '400m from ISKCON Vrindavan',
+        price: 15000,
+        bhk: '2 BHK',
+        builtUpAreaSqFt: 1050,
+        ownerName: 'Devotee Landlord',
+        ownerPhone: '+91 98765 43210',
+        approvalStatus: 'PENDING_APPROVAL',
+        availabilityStatus: 'AVAILABLE',
+        photos: ['sample1.jpg', 'sample2.jpg', 'sample3.jpg'],
+        createdAt: Date.now()
+      };
+      properties.unshift(newProp);
+      saveDatabase();
+      showToast('Sample listing added to Pending Queue for testing.');
+    }
+
+    function filterTable(tableId, query) {
+      const q = query.toLowerCase();
+      const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
       rows.forEach(r => {
         const text = r.innerText.toLowerCase();
         r.style.display = text.includes(q) ? '' : 'none';
       });
     }
 
-    // Try to connect to local Android server if running
-    fetch('http://127.0.0.1:8080/health')
-      .then(() => {
-        document.getElementById('server-status').textContent = 'Local Server Active: http://127.0.0.1:8080/admin';
-      })
-      .catch(() => {
-        document.getElementById('server-status').textContent = 'Standalone Web Mode (http://127.0.0.1:8080)';
-      });
-
-    // === AUTHENTICATION LOGIC ===
-    const DEFAULT_ADMIN_USER = 'admin';
-    const DEFAULT_ADMIN_PASS = 'Brajvaas@2026';
-
-    function isUserAuthenticated() {
-      return sessionStorage.getItem('brajvaas_admin_auth') === 'true';
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function enforceAuth() {
-      const overlay = document.getElementById('admin-login-overlay');
-      if (!overlay) return;
-      if (!isUserAuthenticated()) {
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-      } else {
-        overlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-    }
-
-    function handleLoginSubmit(event) {
-      event.preventDefault();
-      const user = document.getElementById('adminUsername').value.trim();
-      const pass = document.getElementById('adminPassword').value;
-      const errorDiv = document.getElementById('login-error-msg');
-
-      const expectedPass = localStorage.getItem('brajvaas_custom_password') || DEFAULT_ADMIN_PASS;
-      const expectedUser = localStorage.getItem('brajvaas_custom_user') || DEFAULT_ADMIN_USER;
-
-      if (user.toLowerCase() === expectedUser.toLowerCase() && pass === expectedPass) {
+    // Authentication Logic
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById('adminUsername').value.trim();
+      const p = document.getElementById('adminPassword').value;
+      const expectedPass = localStorage.getItem('brajvaas_admin_pass') || 'Brajvaas@2026';
+      if (u === 'admin' && p === expectedPass) {
         sessionStorage.setItem('brajvaas_admin_auth', 'true');
-        sessionStorage.setItem('brajvaas_admin_user', user);
-        errorDiv.style.display = 'none';
-        enforceAuth();
+        document.getElementById('admin-login-overlay').style.display = 'none';
+        showToast('Welcome to Brajvaas Admin Console');
       } else {
-        errorDiv.textContent = 'Invalid Login ID or Password. Default is admin / Brajvaas@2026';
-        errorDiv.style.display = 'block';
-      }
-    }
-
-    function logoutAdmin() {
-      if (confirm('Are you sure you want to log out of Brajvaas Admin Console?')) {
-        sessionStorage.removeItem('brajvaas_admin_auth');
-        sessionStorage.removeItem('brajvaas_admin_user');
-        location.reload();
+        const err = document.getElementById('login-error-msg');
+        err.innerText = 'Invalid Admin credentials! Check username and password.';
+        err.style.display = 'block';
       }
     }
 
     function changeAdminPassword() {
-      const current = prompt('Enter CURRENT Admin Password:');
-      const expectedPass = localStorage.getItem('brajvaas_custom_password') || DEFAULT_ADMIN_PASS;
-      if (current !== expectedPass) {
-        alert('Incorrect current password.');
-        return;
-      }
-      const newPass = prompt('Enter NEW Admin Password (min 6 chars):');
-      if (!newPass || newPass.length < 6) {
+      const newP = prompt('Enter new Admin Password (at least 6 characters):');
+      if (newP && newP.length >= 6) {
+        localStorage.setItem('brajvaas_admin_pass', newP);
+        showToast('Admin password updated successfully.');
+      } else if (newP) {
         alert('Password must be at least 6 characters.');
-        return;
       }
-      localStorage.setItem('brajvaas_custom_password', newPass);
-      alert('Password updated successfully! It will be used for your next logins.');
     }
 
-    // Run auth check on load
-    window.addEventListener('DOMContentLoaded', enforceAuth);
-    setTimeout(enforceAuth, 50);
+    function logoutAdmin() {
+      sessionStorage.removeItem('brajvaas_admin_auth');
+      location.reload();
+    }
+
+    // On Load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (sessionStorage.getItem('brajvaas_admin_auth') === 'true') {
+        document.getElementById('admin-login-overlay').style.display = 'none';
+      }
+      initDatabase();
+    });
   </script>
 </body>
 </html>
