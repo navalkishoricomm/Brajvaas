@@ -124,7 +124,7 @@ fun PropertyDetailScreen(
                         ) {
                             Icon(Icons.Default.Luggage, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Book (₹200 Fee)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Reserve Short Stay", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     } else {
                         Button(
@@ -268,10 +268,31 @@ fun PropertyDetailScreen(
                         ) {
                             Icon(Icons.Default.Place, contentDescription = null, tint = BrajSaffronGold, modifier = Modifier.size(16.dp))
                             Text(
-                                text = "${property.fullAddress}, ${property.locality}, ${property.city}",
+                                text = "${property.locality}, ${property.city}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = BrajEmeraldContainer.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(14.dp))
+                                Text(
+                                    text = "Full exact address is confidential to protect owner privacy. Complete location details & directions are provided upon booking/visit confirmation.",
+                                    fontSize = 11.sp,
+                                    color = BrajEmeraldPrimary,
+                                    lineHeight = 15.sp
+                                )
+                            }
                         }
 
                         if (property.landmark.isNotBlank()) {
@@ -358,10 +379,15 @@ fun PropertyDetailScreen(
                             val fee = property.price / 2
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Tenant Fee (15 Days): ₹${indianFormat.format(fee)}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                Text("Landlord Fee (15 Days): ₹${indianFormat.format(fee)}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("Brokerage Policy:", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                if (fee > 0L) {
+                                    Text("₹${indianFormat.format(fee)} (15 Days Rent)", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = BrajEmeraldPrimary)
+                                } else {
+                                    Text("15 Days Rent as Brokerage", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                                }
                             }
                         }
 

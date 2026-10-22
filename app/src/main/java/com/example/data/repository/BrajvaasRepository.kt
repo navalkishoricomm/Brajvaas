@@ -1263,7 +1263,7 @@ class BrajvaasRepository {
                     propertyId = "prop_1",
                     senderId = "system",
                     senderName = "Brajvaas Desk",
-                    messageText = "Brajvaas Facilitation Connected: 15 days rent brokerage applies to both tenant & owner upon agreement. Complete rent agreement and Mathura police verification handled by Brajvaas.",
+                    messageText = "Brajvaas Facilitation Connected: We charge 15 days rent as brokerage upon agreement. Complete rent agreement and Mathura police verification handled by Brajvaas.",
                     timestamp = now - 7200000,
                     isFromMe = false
                 ),
@@ -1295,7 +1295,7 @@ class BrajvaasRepository {
                     propertyId = "prop_short_1",
                     senderId = "system",
                     senderName = "Brajvaas Stays",
-                    messageText = "Vrindavan Short Stay channel connected. Flat Rs 200 fee from tenant & host applies.",
+                    messageText = "Vrindavan Short Stay channel connected. Flat Rs 200 platform fee applies upon booking.",
                     timestamp = now - 8000000,
                     isFromMe = false
                 ),

@@ -498,7 +498,7 @@ private fun AdminOverviewTab(
                         modifier = Modifier.weight(1f).clickable { onSwitchTab(1) }
                     )
                     AdminMetricCard(
-                        title = "Short Stays (Airbnb)",
+                        title = "Short Stays",
                         count = "$shortStaysCount",
                         badge = "₹200 Fee per Stay",
                         badgeColor = BrajEmeraldPrimary,
@@ -933,9 +933,9 @@ private fun AdminShortStaysTab(bookings: List<ShortStayBooking>) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Vrindavan Airbnb Management (Flat ₹200 Fee Policy)", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
+                    Text("Vrindavan Short Stays & Homestays (Flat ₹200 Platform Fee)", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
                     Text(
-                        "We charge ₹200 from tenant and ₹200 from landlord per stay irrespective of stay duration. Total collected: ₹400 per booking.",
+                        "We charge a flat ₹200 platform fee upon booking irrespective of stay duration.",
                         fontSize = 11.sp
                     )
                 }

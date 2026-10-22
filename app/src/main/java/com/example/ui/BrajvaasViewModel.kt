@@ -506,16 +506,14 @@ class BrajvaasViewModel(
         )
 
         val botReply = when {
-            text.contains("short stay", ignoreCase = true) || text.contains("airbnb", ignoreCase = true) ->
-                "Brajvaas offers Vrindavan Short Stays (Airbnb style) exclusively for Vrindavan. We charge a flat ₹200 from the tenant and ₹200 from the landlord per stay, irrespective of duration."
+            text.contains("short stay", ignoreCase = true) || text.contains("homestay", ignoreCase = true) ->
+                "Brajvaas offers Vrindavan Short Stays & Homestays exclusively for Vrindavan. A flat ₹200 platform fee is calculated upon booking, irrespective of duration."
             text.contains("brokerage", ignoreCase = true) || text.contains("charge", ignoreCase = true) ->
-                "For long-term rentals, Brajvaas charges 15 days rent each from tenant and landlord. We draft the 11-month e-stamped agreement and complete Mathura police verification directly."
-            text.contains("admin", ignoreCase = true) || text.contains("web", ignoreCase = true) ->
-                "The Brajvaas Web Admin Portal is live on http://127.0.0.1:8080/admin via the embedded HTTP server and in the in-app Web Console tab for managing users, listings, leads, and logged coordinates."
-            text.contains("location", ignoreCase = true) ->
-                "Every user action (posting, renting, buying, short-stays) automatically logs exact GPS coordinates visible on the admin dashboard."
+                "For long-term rentals, we charge 15 days rent as brokerage. We draft the 11-month e-stamped agreement and complete Mathura police verification directly."
+            text.contains("location", ignoreCase = true) || text.contains("address", ignoreCase = true) ->
+                "Every property is GPS audited while the full exact address remains confidential for owner privacy until booking or visit confirmation."
             else ->
-                "Radhe Radhe! Brajvaas Mitra is at your service for Vrindavan properties, short stays (₹200 fee), and police verification."
+                "Radhe Radhe! Brajvaas Mitra is at your service for Vrindavan properties, holy short stays, and rental agreements."
         }
 
         val botMsg = ChatMessage(

@@ -627,9 +627,9 @@
 
       <nav class="nav-links">
         <a href="#stays">Holy Stays</a>
+        <a href="#calculator">Fee Calculator</a>
         <a href="#temples">Temples</a>
-        <a href="#services">Legal & Agreements</a>
-        <a href="/admin_portal.html" style="color: var(--accent); font-weight: 700;">🔐 Admin Console</a>
+        <a href="#services">15-Day Brokerage</a>
         <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download">
           <svg style="width: 16px; height: 16px; fill: white;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
           Download App
@@ -646,15 +646,22 @@
       </div>
       <h1>Divine Living in <span>Sri Vrindavan Dham</span> & Mathura</h1>
       <p>
-        Brajvaas connects devotees, residents, and pilgrims directly with verified homestays, apartments, and freehold plots. Zero middleman inflation with our transparent flat ₹200 fee policy.
+        Brajvaas connects devotees, residents, and pilgrims directly with verified homestays, apartments, and freehold plots. For rental properties, we charge 15 days rent as brokerage, handling complete 11-month e-stamped legal agreements and Mathura police verification.
       </p>
 
       <div class="usp-grid" style="padding: 0; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="font-size: 24px;">🛏️</div>
           <div>
-            <strong style="display: block; font-size: 14px; color: var(--primary-dark);">₹200 Flat Stays</strong>
-            <span style="font-size: 12px; color: var(--text-muted);">No 25% hotel commission</span>
+            <strong style="display: block; font-size: 14px; color: var(--primary-dark);">Verified Holy Stays</strong>
+            <span style="font-size: 12px; color: var(--text-muted);">Peaceful pilgrim homestays</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 24px;">📜</div>
+          <div>
+            <strong style="display: block; font-size: 14px; color: var(--primary-dark);">15 Days Brokerage</strong>
+            <span style="font-size: 12px; color: var(--text-muted);">Full agreement & police verification</span>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -714,6 +721,162 @@
     </div>
   </section>
 
+  <!-- Stays Showcase -->
+  <section class="stays-section" id="stays">
+    <div class="section-header">
+      <h2>Featured Devotee Short Stays & Accommodations</h2>
+      <p>Handpicked peaceful stays for devotees and pilgrims in Vrindavan Dham.</p>
+    </div>
+
+    <div class="stay-cards-grid">
+      <!-- Stay 1 -->
+      <div class="stay-card">
+        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80');">
+          <span class="stay-badge-fee">Vrindavan Short Stay</span>
+        </div>
+        <div class="stay-body">
+          <div>
+            <div class="stay-title">Radha Madhav Devotee Homestay</div>
+            <div class="stay-location">📍 Sunrakh Road Area, Vrindavan <span style="font-size: 11px; color: #D97706; font-weight: 600;">(Address confidential until booked)</span></div>
+            <p style="font-size: 13px; color: var(--text-muted);">Quiet, devotional atmosphere with Satvik kitchen and 24/7 security near Prem Mandir.</p>
+          </div>
+          <div class="stay-price-row">
+            <div>
+              <div class="price-val">₹1,150 <span class="price-period">/ night</span></div>
+              <span style="font-size: 11px; color: #16A34A; font-weight: 700;">Verified GPS: 27.5812° N</span>
+            </div>
+            <button onclick="calculateStay(1150, 'Radha Madhav Homestay')" class="btn-nav-download" style="border: none; cursor: pointer; padding: 8px 14px; font-size: 12px;">Calculate & Book</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stay 2 -->
+      <div class="stay-card">
+        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80');">
+          <span class="stay-badge-fee">Long Term Rental</span>
+        </div>
+        <div class="stay-body">
+          <div>
+            <div class="stay-title">2 BHK Parikrama View Flat</div>
+            <div class="stay-location">📍 Raman Reti Locality, Vrindavan <span style="font-size: 11px; color: #D97706; font-weight: 600;">(Address confidential until visit)</span></div>
+            <p style="font-size: 13px; color: var(--text-muted);">Fully furnished apartment with AC, geysers, lift, and covered parking.</p>
+          </div>
+          <div class="stay-price-row">
+            <div>
+              <div class="price-val">₹16,000 <span class="price-period">/ month</span></div>
+              <span style="font-size: 11px; color: #D97706; font-weight: 700;">15 Days Rent as Brokerage</span>
+            </div>
+            <button onclick="calculateRent(16000, '2 BHK Parikrama View Flat')" class="btn-nav-download" style="border: none; cursor: pointer; padding: 8px 14px; font-size: 12px;">Brokerage Breakdown</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stay 3 -->
+      <div class="stay-card">
+        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80');">
+          <span class="stay-badge-fee" style="background: #92400E;">Freehold Plot</span>
+        </div>
+        <div class="stay-body">
+          <div>
+            <div class="stay-title">150 Sq. Yd. Freehold Residential Plot</div>
+            <div class="stay-location">📍 Chhatikara Road Zone, Vrindavan <span style="font-size: 11px; color: #D97706; font-weight: 600;">(Address confidential until visit)</span></div>
+            <p style="font-size: 13px; color: var(--text-muted);">Clear title registry plot ready for immediate construction with wide road.</p>
+          </div>
+          <div class="stay-price-row">
+            <div>
+              <div class="price-val">₹24,50,000</div>
+              <span style="font-size: 11px; color: #16A34A; font-weight: 700;">Direct Owner • Freehold Title</span>
+            </div>
+            <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download" style="padding: 8px 14px; font-size: 12px;">View in App</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Stay & Brokerage Fee Calculation Section -->
+  <section class="temple-section" id="calculator" style="background: #FFFFFF; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="section-header">
+      <h2>Fee & Booking Cost Calculator</h2>
+      <p>Transparent fee calculation. See exact costs before you book or lease.</p>
+    </div>
+
+    <div style="max-width: 860px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: var(--shadow);">
+      <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px;">
+        <button id="tab-btn-stay" onclick="switchCalcTab('stay')" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">
+          🛏️ Short Stay Calculation
+        </button>
+        <button id="tab-btn-rent" onclick="switchCalcTab('rent')" style="background: #E2E8F0; color: #334155; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">
+          📜 Rental Brokerage (15 Days)
+        </button>
+      </div>
+
+      <!-- Short Stay Calculator View -->
+      <div id="calc-stay-view">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Nightly Tariff (₹)</label>
+            <input type="number" id="calc-nightly-rate" value="1150" oninput="updateStayCalc()" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Number of Nights</label>
+            <input type="number" id="calc-nights-count" value="2" min="1" max="30" oninput="updateStayCalc()" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600;">
+          </div>
+        </div>
+
+        <div style="background: var(--primary-light); border: 1px solid #C6E7DC; border-radius: 12px; padding: 20px;">
+          <h4 style="color: var(--primary-dark); font-size: 15px; margin-bottom: 12px; font-weight: 800;">Calculation Breakdown:</h4>
+          <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #1E293B;">
+            <span>Accommodation Subtotal (<span id="out-nights-label">2</span> nights × ₹<span id="out-rate-label">1,150</span>):</span>
+            <span style="font-weight: 700;" id="out-subtotal">₹2,300</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: var(--primary-dark);">
+            <span style="font-weight: 700;">Brajvaas Platform & Facilitation Fee:</span>
+            <span style="font-weight: 800; color: var(--primary); background: #FFFFFF; padding: 2px 8px; border-radius: 4px; border: 1px dashed var(--primary);">₹200 (Flat)</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+            * The flat ₹200 fee applies during booking. No percentage markups or hidden booking charges.
+          </div>
+          <hr style="border: none; border-top: 1px solid #B4DFD1; margin: 12px 0;">
+          <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; color: var(--primary-dark);">
+            <span>Total Payable Amount:</span>
+            <span id="out-total" style="color: var(--primary-dark);">₹2,500</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rental Brokerage Calculator View -->
+      <div id="calc-rent-view" style="display: none;">
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Monthly Rent of Property (₹)</label>
+          <input type="number" id="calc-rent-rate" value="16000" oninput="updateRentCalc()" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600;">
+        </div>
+
+        <div style="background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 12px; padding: 20px;">
+          <h4 style="color: #78350F; font-size: 15px; margin-bottom: 12px; font-weight: 800;">Rental Brokerage Policy:</h4>
+          <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #1E293B;">
+            <span>Agreed Monthly Rent:</span>
+            <span style="font-weight: 700;" id="out-rent-subtotal">₹16,000</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 8px; color: #78350F;">
+            <span style="font-weight: 800;">Brokerage (15 Days Rent):</span>
+            <span style="font-weight: 800; font-size: 17px;" id="out-brokerage-fee">₹8,000</span>
+          </div>
+          <div style="background: white; border-radius: 8px; padding: 12px; font-size: 12px; color: #78350F; margin-top: 12px; line-height: 1.5;">
+            <strong>✓ Complete Legal Work Included:</strong><br>
+            We charge 15 days rent as brokerage upon successful tenancy agreement. In return, Brajvaas prepares the 11-month legal e-stamped rent agreement and completes Mathura District police tenant verification directly.
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download" style="padding: 12px 28px; font-size: 14px;">
+          📱 Open in App to Book or Inquire
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- Temple Distances -->
   <section class="temple-section" id="temples">
     <div class="section-header">
@@ -756,103 +919,30 @@
     </div>
   </section>
 
-  <!-- Stays Showcase -->
-  <section class="stays-section" id="stays">
-    <div class="section-header">
-      <h2>Featured Devotee Short Stays & Stays</h2>
-      <p>Flat ₹200 fee per booking. Fair pricing for both host and guest.</p>
-    </div>
-
-    <div class="stay-cards-grid">
-      <!-- Stay 1 -->
-      <div class="stay-card">
-        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80');">
-          <span class="stay-badge-fee">₹200 Flat Service Fee</span>
-        </div>
-        <div class="stay-body">
-          <div>
-            <div class="stay-title">Radha Madhav Devotee Homestay</div>
-            <div class="stay-location">📍 Sunrakh Road, Near Prem Mandir, Vrindavan</div>
-            <p style="font-size: 13px; color: var(--text-muted);">Quiet, devotional atmosphere with Satvik kitchen and 24/7 security.</p>
-          </div>
-          <div class="stay-price-row">
-            <div>
-              <div class="price-val">₹1,150 <span class="price-period">/ night</span></div>
-              <span style="font-size: 11px; color: #16A34A; font-weight: 700;">Verified GPS: 27.5812° N</span>
-            </div>
-            <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download" style="padding: 8px 14px; font-size: 12px;">Book in App</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stay 2 -->
-      <div class="stay-card">
-        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80');">
-          <span class="stay-badge-fee">Long Term Rental</span>
-        </div>
-        <div class="stay-body">
-          <div>
-            <div class="stay-title">2 BHK Parikrama View Flat</div>
-            <div class="stay-location">📍 Raman Reti, Bhaktivedanta Swami Marg</div>
-            <p style="font-size: 13px; color: var(--text-muted);">Fully furnished apartment with AC, geysers, lift, and covered parking.</p>
-          </div>
-          <div class="stay-price-row">
-            <div>
-              <div class="price-val">₹16,000 <span class="price-period">/ month</span></div>
-              <span style="font-size: 11px; color: #16A34A; font-weight: 700;">Verified Owner Listing</span>
-            </div>
-            <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download" style="padding: 8px 14px; font-size: 12px;">Contact in App</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stay 3 -->
-      <div class="stay-card">
-        <div class="stay-image" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80');">
-          <span class="stay-badge-fee" style="background: #92400E;">Freehold Plot</span>
-        </div>
-        <div class="stay-body">
-          <div>
-            <div class="stay-title">150 Sq. Yd. Freehold Residential Plot</div>
-            <div class="stay-location">📍 Chhatikara - Vrindavan Road</div>
-            <p style="font-size: 13px; color: var(--text-muted);">Clear title registry plot ready for immediate construction with wide road.</p>
-          </div>
-          <div class="stay-price-row">
-            <div>
-              <div class="price-val">₹24,50,000</div>
-              <span style="font-size: 11px; color: #16A34A; font-weight: 700;">Direct Owner • Zero Brokerage</span>
-            </div>
-            <a href="/brajvaas.apk" download="brajvaas.apk" class="btn-nav-download" style="padding: 8px 14px; font-size: 12px;">View in App</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Legal & Value Proposition -->
   <section class="temple-section" id="services" style="background: #FFFDF7;">
     <div class="section-header">
-      <h2>Complete Peace of Mind in Holy Braj</h2>
-      <p>Transparent agreements, verified identities, and exact location tracking.</p>
+      <h2>15 Days Rent as Brokerage with Complete Legal Care</h2>
+      <p>Transparent agreements, verified identities, and exact location tracking in Holy Braj.</p>
     </div>
 
     <div class="usp-grid">
       <div class="usp-card">
         <div class="usp-icon" style="background: #E8F5F1; color: #0F5A47;">📜</div>
         <h3>11-Month Rental Agreements</h3>
-        <p>Brajvaas prepares legally compliant 11-month rental contracts ensuring both owner and tenant terms are documented clearly.</p>
+        <p>Brajvaas prepares legally compliant 11-month rental contracts with official e-stamping and clear documentation.</p>
       </div>
 
       <div class="usp-card">
         <div class="usp-icon" style="background: #FEF3C7; color: #D97706;">👮</div>
         <h3>Police Verification Assistance</h3>
-        <p>Tenant identity records and government ID verifications filed with local Mathura-Vrindavan police jurisdiction.</p>
+        <p>Tenant identity records and government ID verifications filed directly with local Mathura-Vrindavan police jurisdiction.</p>
       </div>
 
       <div class="usp-card">
         <div class="usp-icon" style="background: #EDE9FE; color: #6D28D9;">🎯</div>
         <h3>GPS Pinpointed Locations</h3>
-        <p>No vague directions. Every property is tagged with exact GPS latitude and longitude with direct Google Maps navigation.</p>
+        <p>No vague directions. Every property is tagged with exact GPS latitude and longitude with direct navigation while keeping full address confidential for privacy.</p>
       </div>
     </div>
   </section>
@@ -881,11 +971,12 @@
       </div>
 
       <div class="footer-col">
-        <h4>Administration</h4>
+        <h4>Devotee Assistance & Terms</h4>
         <ul>
-          <li><a href="/admin_portal.html" style="color: #F59E0B; font-weight: 700;">🔐 Admin Console Login</a></li>
-          <li><a href="https://admin.brajvaas.in">admin.brajvaas.in</a></li>
-          <li><a href="/admin">/admin shortcut</a></li>
+          <li><a href="#services">15 Days Rent as Brokerage</a></li>
+          <li><a href="#calculator">Fee & Stay Cost Calculator</a></li>
+          <li><a href="#stays">Short Stays & Homestays</a></li>
+          <li><a href="#temples">Temple Distances & Darshan Route</a></li>
         </ul>
       </div>
     </div>
@@ -898,5 +989,67 @@
     </div>
   </footer>
 
+  <script>
+    function switchCalcTab(tab) {
+      const stayView = document.getElementById('calc-stay-view');
+      const rentView = document.getElementById('calc-rent-view');
+      const btnStay = document.getElementById('tab-btn-stay');
+      const btnRent = document.getElementById('tab-btn-rent');
+
+      if (tab === 'stay') {
+        stayView.style.display = 'block';
+        rentView.style.display = 'none';
+        btnStay.style.background = 'var(--primary)';
+        btnStay.style.color = 'white';
+        btnRent.style.background = '#E2E8F0';
+        btnRent.style.color = '#334155';
+        updateStayCalc();
+      } else {
+        stayView.style.display = 'none';
+        rentView.style.display = 'block';
+        btnRent.style.background = '#D97706';
+        btnRent.style.color = 'white';
+        btnStay.style.background = '#E2E8F0';
+        btnStay.style.color = '#334155';
+        updateRentCalc();
+      }
+    }
+
+    function updateStayCalc() {
+      const rate = parseInt(document.getElementById('calc-nightly-rate').value) || 0;
+      const nights = parseInt(document.getElementById('calc-nights-count').value) || 1;
+      const subtotal = rate * nights;
+      const platformFee = 200;
+      const total = subtotal + platformFee;
+
+      document.getElementById('out-nights-label').textContent = nights;
+      document.getElementById('out-rate-label').textContent = rate.toLocaleString('en-IN');
+      document.getElementById('out-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
+      document.getElementById('out-total').textContent = '₹' + total.toLocaleString('en-IN');
+    }
+
+    function updateRentCalc() {
+      const rent = parseInt(document.getElementById('calc-rent-rate').value) || 0;
+      const brokerage = Math.round(rent / 2);
+
+      document.getElementById('out-rent-subtotal').textContent = '₹' + rent.toLocaleString('en-IN');
+      document.getElementById('out-brokerage-fee').textContent = '₹' + brokerage.toLocaleString('en-IN') + ' (15 Days)';
+    }
+
+    function calculateStay(rate, title) {
+      document.getElementById('calc-nightly-rate').value = rate;
+      switchCalcTab('stay');
+      document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function calculateRent(rent, title) {
+      document.getElementById('calc-rent-rate').value = rent;
+      switchCalcTab('rent');
+      document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    updateStayCalc();
+    updateRentCalc();
+  </script>
 </body>
 </html>

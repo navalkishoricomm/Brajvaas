@@ -95,7 +95,7 @@ fun ManagedAgreementsScreen(
                         }
 
                         Text(
-                            text = "We charge 15 days rent from the tenant and 15 days rent from the landlord upon successful deal finalization. In return, all legal and administrative work is handled by us:",
+                            text = "We charge 15 days rent as brokerage upon successful deal finalization. In return, all legal and administrative work is handled by us:",
                             fontSize = 12.sp,
                             color = BrajOnEmeraldContainer
                         )
@@ -283,7 +283,7 @@ fun ManagedAgreementsScreen(
                     Text("Landlord: ${agr.landlordName}")
                     Text("Premises: ${agr.propertyTitle}, ${agr.locality}")
                     Text("Monthly Rent: ₹${indianFormat.format(agr.monthlyRent)}")
-                    Text("Brajvaas Brokerage (15 Days): ₹${indianFormat.format(agr.brokerage15DaysFee)} from each party")
+                    Text("Brajvaas Brokerage (15 Days): ₹${indianFormat.format(agr.brokerage15DaysFee)}")
                     HorizontalDivider()
                     Text("Status: ${agr.agreementStatus.label}", fontWeight = FontWeight.Bold)
                     Text("Police Clearance: ${agr.policeVerificationStatus.label}", fontWeight = FontWeight.Bold, color = BrajVerifiedGreen)

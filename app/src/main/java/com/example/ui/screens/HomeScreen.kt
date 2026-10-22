@@ -119,28 +119,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Admin Mode quick toggle button
-                    IconButton(
-                        onClick = { viewModel.toggleAdminMode() },
-                        modifier = Modifier.testTag("admin_mode_toggle_btn")
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                if (pendingCount > 0) {
-                                    Badge(containerColor = BrajPendingOrange) {
-                                        Text("$pendingCount")
-                                    }
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = if (isAdminMode) Icons.Default.AdminPanelSettings else Icons.Outlined.AdminPanelSettings,
-                                contentDescription = "Admin Mode",
-                                tint = if (isAdminMode) BrajEmeraldPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
                     // Direct chat inbox button
                     IconButton(
                         onClick = { viewModel.navigateTo(AppScreen.MESSAGES) },
@@ -178,61 +156,6 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Admin Banner if admin mode is enabled
-            if (isAdminMode) {
-                item {
-                    Surface(
-                        color = BrajPendingOrangeContainer,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { viewModel.navigateTo(AppScreen.ADMIN_PORTAL) }
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AdminPanelSettings,
-                                    contentDescription = null,
-                                    tint = BrajPendingOrange
-                                )
-                                Column {
-                                    Text(
-                                        text = "Admin Portal Active",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp,
-                                        color = BrajPendingOrange
-                                    )
-                                    Text(
-                                        text = "$pendingCount properties pending your review & approval",
-                                        fontSize = 11.sp,
-                                        color = Color.DarkGray
-                                    )
-                                }
-                            }
-                            FilledTonalButton(
-                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_PORTAL) },
-                                colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = BrajPendingOrange,
-                                    contentColor = Color.White
-                                ),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text("Review", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-            }
-
             // Hero Banner
             item {
                 Box(
@@ -301,7 +224,7 @@ fun HomeScreen(
                 }
             }
 
-            // Dedicated Service Action Cards (Short Stays & Web Admin Portal)
+            // Dedicated Service Action Cards (Short Stays & 11-Month Agreements)
             item {
                 Row(
                     modifier = Modifier
@@ -309,7 +232,7 @@ fun HomeScreen(
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Vrindavan Short Stays Card (Airbnb style - flat Rs 200 fee)
+                    // Vrindavan Short Stays Card
                     Card(
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(containerColor = BrajSaffronGoldContainer),
@@ -326,33 +249,33 @@ fun HomeScreen(
                                 Icon(Icons.Default.Luggage, contentDescription = null, tint = BrajOnSaffronContainer, modifier = Modifier.size(16.dp))
                                 Text("Short Stays", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajOnSaffronContainer)
                             }
-                            Text("AirBnb for Vrindavan", fontWeight = FontWeight.Black, fontSize = 13.sp, color = BrajOnSaffronContainer)
+                            Text("Holy Pilgrim Stays", fontWeight = FontWeight.Black, fontSize = 13.sp, color = BrajOnSaffronContainer)
                             Surface(shape = RoundedCornerShape(4.dp), color = BrajSaffronGold) {
-                                Text("Flat ₹200 Fee", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
+                                Text("Devotee Homestays", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
                             }
                         }
                     }
 
-                    // Web Admin Panel Card
+                    // 11-Month Rental Agreements Card
                     Card(
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(containerColor = BrajEmeraldContainer),
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { viewModel.navigateTo(AppScreen.WEB_ADMIN_PANEL) }
-                            .testTag("home_web_admin_card")
+                            .clickable { viewModel.navigateTo(AppScreen.MANAGED_AGREEMENTS) }
+                            .testTag("home_agreements_card")
                     ) {
                         Column(
                             modifier = Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Icon(Icons.Default.AdminPanelSettings, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
-                                Text("Admin Panel", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
+                                Icon(Icons.Default.AssignmentTurnedIn, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
+                                Text("Rental Care", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
                             }
-                            Text("Web Dashboard", fontWeight = FontWeight.Black, fontSize = 13.sp, color = BrajEmeraldPrimary)
+                            Text("11-Month Leases", fontWeight = FontWeight.Black, fontSize = 13.sp, color = BrajEmeraldPrimary)
                             Surface(shape = RoundedCornerShape(4.dp), color = BrajEmeraldPrimary) {
-                                Text("With Web Link", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
+                                Text("15 Days Brokerage", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
                             }
                         }
                     }

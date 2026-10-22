@@ -273,7 +273,8 @@ fun PostPropertyScreen(
                     OutlinedTextField(
                         value = fullAddress,
                         onValueChange = { fullAddress = it },
-                        label = { Text("Full Address & Society / Ashram Name") },
+                        label = { Text("Exact Address / House No. (Kept Strictly Confidential)") },
+                        supportingText = { Text("🔒 Confidential: Full address remains private and is never shown publicly to users.") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -343,7 +344,7 @@ fun PostPropertyScreen(
                 }
             }
 
-            // Section 4: Pricing & Area
+            // Section 4: Pricing & Area Dimensions
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -352,76 +353,152 @@ fun PostPropertyScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("4. Pricing & Area Dimensions", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
-
-                    OutlinedTextField(
-                        value = priceText,
-                        onValueChange = { priceText = it },
-                        label = { Text(if (listingType == ListingType.RENT) "Expected Monthly Rent (₹)" else "Total Sale Price (₹)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("post_price_input"),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    if (listingType == ListingType.RENT) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedTextField(
-                                value = depositText,
-                                onValueChange = { depositText = it },
-                                label = { Text("Security Deposit (₹)") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            OutlinedTextField(
-                                value = maintenanceText,
-                                onValueChange = { maintenanceText = it },
-                                label = { Text("Monthly Maint. (₹)") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(10.dp)
-                            )
+                    when (listingType) {
+                        ListingType.SHORT_STAY -> {
+                            Text("4. Stay Accommodation Details", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                            Surface(
+                                color = BrajEmeraldContainer,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Info, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
+                                    Text(
+                                        text = "Pricing and area calculations are not required for short stays. Daily pilgrim tariffs are managed during verification.",
+                                        fontSize = 11.sp,
+                                        color = BrajEmeraldPrimary
+                                    )
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = floorText,
+                                    onValueChange = { floorText = it },
+                                    label = { Text("Floor No.") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                OutlinedTextField(
+                                    value = totalFloorsText,
+                                    onValueChange = { totalFloorsText = it },
+                                    label = { Text("Total Floors") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
                         }
-                    }
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = builtUpAreaText,
-                            onValueChange = { builtUpAreaText = it },
-                            label = { Text("Built-up (sq.ft)") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        OutlinedTextField(
-                            value = carpetAreaText,
-                            onValueChange = { carpetAreaText = it },
-                            label = { Text("Carpet Area (sq.ft)") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                    }
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = floorText,
-                            onValueChange = { floorText = it },
-                            label = { Text("Floor No.") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        OutlinedTextField(
-                            value = totalFloorsText,
-                            onValueChange = { totalFloorsText = it },
-                            label = { Text("Total Floors") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
+                        ListingType.RENT -> {
+                            Text("4. Area Dimensions (Pricing not required)", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                            Surface(
+                                color = BrajEmeraldContainer,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Info, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
+                                    Text(
+                                        text = "Pricing is not required for rented properties. Only area dimensions are required. We charge 15 days rent as brokerage.",
+                                        fontSize = 11.sp,
+                                        color = BrajEmeraldPrimary
+                                    )
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = builtUpAreaText,
+                                    onValueChange = { builtUpAreaText = it },
+                                    label = { Text("Built-up (sq.ft) *") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                OutlinedTextField(
+                                    value = carpetAreaText,
+                                    onValueChange = { carpetAreaText = it },
+                                    label = { Text("Carpet Area (sq.ft)") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = floorText,
+                                    onValueChange = { floorText = it },
+                                    label = { Text("Floor No.") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                OutlinedTextField(
+                                    value = totalFloorsText,
+                                    onValueChange = { totalFloorsText = it },
+                                    label = { Text("Total Floors") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
+                        }
+                        ListingType.SELL -> {
+                            Text("4. Pricing & Area Dimensions", fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
+                            OutlinedTextField(
+                                value = priceText,
+                                onValueChange = { priceText = it },
+                                label = { Text("Total Sale Price (₹)") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("post_price_input"),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = builtUpAreaText,
+                                    onValueChange = { builtUpAreaText = it },
+                                    label = { Text("Built-up (sq.ft)") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                OutlinedTextField(
+                                    value = carpetAreaText,
+                                    onValueChange = { carpetAreaText = it },
+                                    label = { Text("Carpet Area (sq.ft)") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = floorText,
+                                    onValueChange = { floorText = it },
+                                    label = { Text("Floor No.") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                OutlinedTextField(
+                                    value = totalFloorsText,
+                                    onValueChange = { totalFloorsText = it },
+                                    label = { Text("Total Floors") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -584,9 +661,16 @@ fun PostPropertyScreen(
             Button(
                 onClick = {
                     val finalTitle = title.ifBlank { "$bhk $selectedLocality $selectedCity" }
-                    val finalPrice = priceText.toLongOrNull() ?: if (listingType == ListingType.RENT) 15000L else 4500000L
-                    val finalDeposit = depositText.toLongOrNull() ?: (finalPrice * 2)
-                    val finalMaint = maintenanceText.toLongOrNull() ?: 1200L
+                    val finalPrice = when (listingType) {
+                        ListingType.SHORT_STAY -> 0L
+                        ListingType.RENT -> 0L
+                        ListingType.SELL -> priceText.toLongOrNull() ?: 4500000L
+                    }
+                    val finalDeposit = if (listingType == ListingType.RENT) 0L else depositText.toLongOrNull() ?: (finalPrice * 2)
+                    val finalMaint = if (listingType == ListingType.RENT || listingType == ListingType.SHORT_STAY) 0L else maintenanceText.toLongOrNull() ?: 1200L
+
+                    val finalBuiltUp = if (listingType == ListingType.SHORT_STAY) 0 else (builtUpAreaText.toIntOrNull() ?: 1000)
+                    val finalCarpet = if (listingType == ListingType.SHORT_STAY) 0 else (carpetAreaText.toIntOrNull() ?: 850)
 
                     val legalStatusStr = buildString {
                         if (isMvdaApproved) append("MVDA Approved • ")
@@ -605,8 +689,8 @@ fun PostPropertyScreen(
                         deposit = finalDeposit,
                         maintenance = finalMaint,
                         bhk = bhk,
-                        builtUpArea = builtUpAreaText.toIntOrNull() ?: 1000,
-                        carpetArea = carpetAreaText.toIntOrNull() ?: 850,
+                        builtUpArea = finalBuiltUp,
+                        carpetArea = finalCarpet,
                         floor = floorText.toIntOrNull() ?: 1,
                         totalFloors = totalFloorsText.toIntOrNull() ?: 4,
                         furnishing = furnishing,

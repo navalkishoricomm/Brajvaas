@@ -371,8 +371,8 @@ class AdminWebServer(private val repository: BrajvaasRepository) {
   <div class="container">
     <div class="banner-notice">
       <strong>Active Policy & Business Rules:</strong>
-      Long-term rentals charge <strong>15 days rent</strong> from tenant and landlord (Rent agreement & police verification managed by Brajvaas).
-      Vrindavan Short Stays (AirBnb-style) charge a flat <strong>₹200 from tenant and ₹200 from landlord</strong> per stay irrespective of stay duration.
+      Long-term rentals charge <strong>15 days rent as brokerage</strong> (Rent agreement & police verification managed by Brajvaas).
+      Vrindavan Short Stays & Homestays charge a flat <strong>₹200 platform fee</strong> upon booking.
       All user actions (posting, renting, buying, short stays) log <strong>exact GPS coordinates</strong> displayed below.
     </div>
 
@@ -606,10 +606,10 @@ class AdminWebServer(private val repository: BrajvaasRepository) {
     <div id="tab-shortstays" class="panel-section">
       <div class="card">
         <div class="card-title">
-          <span>Vrindavan Short Stays (AirBnb Model)</span>
-          <span class="fee-badge">₹200 Fee from Tenant + ₹200 from Landlord</span>
+          <span>Vrindavan Short Stays & Homestays</span>
+          <span class="fee-badge">₹200 Flat Platform Fee</span>
         </div>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Exclusive to Vrindavan locality. Irrespective of stay duration, Brajvaas charges flat ₹200 service fee from the devotee guest and flat ₹200 from the landlord host.</p>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Exclusive to Vrindavan locality. Irrespective of stay duration, Brajvaas calculates a flat ₹200 platform fee upon booking.</p>
         <table>
           <thead>
             <tr>

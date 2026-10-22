@@ -138,7 +138,7 @@ private fun FaqSection() {
         ),
         Pair(
             "What is the Brajvaas 15-Day Brokerage Model?",
-            "Unlike traditional unorganized brokers who charge full months of rent and offer no legal support, Brajvaas charges a transparent 15 days rent from both the landlord and tenant. In return, the entire 11-month legal e-stamped rental agreement and mandatory Mathura District police verification are prepared and executed by our dedicated team."
+            "Unlike traditional unorganized brokers who charge full months of rent and offer no legal support, Brajvaas charges a transparent 15 days rent as brokerage. In return, the entire 11-month legal e-stamped rental agreement and mandatory Mathura District police verification are prepared and executed by our dedicated team."
         ),
         Pair(
             "How does tenant police verification get done by Brajvaas in Mathura District?",

@@ -61,7 +61,7 @@ fun ShortStaysScreen(
                                 color = BrajSaffronGold
                             ) {
                                 Text(
-                                    "AirBnb Style",
+                                    "Devotee Homestays",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -70,7 +70,7 @@ fun ShortStaysScreen(
                             }
                         }
                         Text(
-                            "Exclusively Vrindavan • ₹200 Flat Fee per Stay",
+                            "Exclusively Vrindavan • Peaceful Devotee Accommodations",
                             style = MaterialTheme.typography.labelSmall,
                             color = BrajEmeraldPrimary,
                             fontWeight = FontWeight.SemiBold
@@ -80,11 +80,6 @@ fun ShortStaysScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack, modifier = Modifier.testTag("short_stays_back_btn")) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.navigateTo(AppScreen.WEB_ADMIN_PANEL) }) {
-                        Icon(Icons.Default.AdminPanelSettings, contentDescription = "Admin View", tint = BrajEmeraldPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -97,7 +92,7 @@ fun ShortStaysScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Pricing policy card
+            // Devotee Stays Policy banner
             Surface(
                 color = BrajSaffronGoldContainer.copy(alpha = 0.8f),
                 modifier = Modifier.fillMaxWidth()
@@ -108,20 +103,20 @@ fun ShortStaysScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CurrencyRupee,
+                        imageVector = Icons.Default.TempleHindu,
                         contentDescription = null,
                         tint = BrajOnSaffronContainer,
                         modifier = Modifier.size(24.dp)
                     )
                     Column {
                         Text(
-                            text = "Transparent Pricing: Flat ₹200 from Tenant & ₹200 from Landlord",
+                            text = "Sacred Braj Homestays in Vrindavan Dham",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             color = BrajOnSaffronContainer
                         )
                         Text(
-                            text = "Irrespective of stay duration! No hidden percentage commission.",
+                            text = "Satvik environment, temple proximity, and direct key handover.",
                             fontSize = 11.sp,
                             color = BrajOnSaffronContainer.copy(alpha = 0.9f)
                         )
@@ -257,7 +252,7 @@ private fun ShortStayCard(
                     }
                 }
 
-                // AirBnb Vrindavan Badge
+                // Vrindavan Devotee Stay Badge
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = BrajEmeraldPrimary,
@@ -342,10 +337,9 @@ private fun ShortStayCard(
                             )
                         }
                         Text(
-                            text = "+ ₹200 flat Brajvaas service fee",
+                            text = "Transparent fee calculated at booking",
                             fontSize = 10.sp,
-                            color = BrajSaffronGold,
-                            fontWeight = FontWeight.Bold
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -355,9 +349,9 @@ private fun ShortStayCard(
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.testTag("book_stay_${stay.id}")
                     ) {
-                        Icon(Icons.Default.Luggage, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Reserve Stay", fontWeight = FontWeight.Bold)
+                        Text("Calculate & Book", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -430,8 +424,7 @@ private fun BookingSummaryCard(booking: com.example.data.model.ShortStayBooking)
                         Text("Check-Out: ${booking.checkOutDate}", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Text("Stay Charge (${booking.numberOfNights} nights): ₹${indianFormat.format(booking.staySubtotal)}", fontSize = 11.sp)
-                    Text("Brajvaas Tenant Fee: ₹200 (Flat)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
-                    Text("Brajvaas Landlord Fee: ₹200 (Paid by Host)", fontSize = 11.sp, color = Color.Gray)
+                    Text("Brajvaas Platform Fee: ₹200 (Flat)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Total Paid by Guest:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
@@ -483,7 +476,7 @@ private fun ShortStayBookingDialog(
         title = {
             Column {
                 Text("Book Vrindavan Short Stay", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text("Brajvaas Flat ₹200 Fee Policy", fontSize = 11.sp, color = BrajEmeraldPrimary, fontWeight = FontWeight.SemiBold)
+                Text("Transparent Cost & Fee Calculation", fontSize = 11.sp, color = BrajEmeraldPrimary, fontWeight = FontWeight.SemiBold)
             }
         },
         text = {
@@ -564,12 +557,8 @@ private fun ShortStayBookingDialog(
                             Text("₹${indianFormat.format(subtotal)}", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Brajvaas Tenant Fee (Flat)", fontSize = 11.sp, color = BrajEmeraldPrimary, fontWeight = FontWeight.Bold)
+                            Text("Brajvaas Platform & Facilitation Fee", fontSize = 11.sp, color = BrajEmeraldPrimary, fontWeight = FontWeight.Bold)
                             Text("₹200", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = BrajEmeraldPrimary)
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Landlord Fee (Flat, paid by host)", fontSize = 10.sp, color = Color.Gray)
-                            Text("₹200", fontSize = 10.sp, color = Color.Gray)
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
