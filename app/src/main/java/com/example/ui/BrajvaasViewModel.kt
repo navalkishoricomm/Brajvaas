@@ -21,7 +21,8 @@ enum class AppScreen {
     USER_ACTIVITY,
     MANAGED_AGREEMENTS,
     SHORT_STAYS,
-    WEB_ADMIN_PANEL
+    WEB_ADMIN_PANEL,
+    CONTACT_US
 }
 
 data class UiNotification(
@@ -30,8 +31,10 @@ data class UiNotification(
 )
 
 class BrajvaasViewModel(
-    private val repository: BrajvaasRepository = BrajvaasRepository()
-) : ViewModel() {
+    application: android.app.Application
+) : androidx.lifecycle.AndroidViewModel(application) {
+
+    private val repository: BrajvaasRepository = BrajvaasRepository(application.applicationContext)
 
     // Navigation State
     private val _currentScreen = MutableStateFlow(AppScreen.HOME)

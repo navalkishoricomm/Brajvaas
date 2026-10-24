@@ -92,6 +92,11 @@ fun SupportCenterScreen(
                     onClick = { selectedTab = 2 },
                     text = { Text("Support Tickets", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                 )
+                Tab(
+                    selected = selectedTab == 3,
+                    onClick = { selectedTab = 3 },
+                    text = { Text("Contact Us", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                )
             }
 
             when (selectedTab) {
@@ -124,6 +129,7 @@ fun SupportCenterScreen(
                         }
                     }
                 )
+                3 -> ContactUsContent(viewModel = viewModel)
             }
         }
     }

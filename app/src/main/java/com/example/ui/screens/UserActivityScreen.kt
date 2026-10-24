@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -190,6 +191,60 @@ fun UserActivityScreen(
                                         color = BrajOnSaffronContainer
                                     )
                                 }
+                            }
+                        }
+
+                        // Admin Portal Quick Tile
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = BrajEmeraldPrimary.copy(alpha = 0.08f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.navigateTo(AppScreen.ADMIN_PORTAL) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.AdminPanelSettings, contentDescription = null, tint = BrajEmeraldPrimary)
+                                    Column {
+                                        Text("Admin Verification & Moderation", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
+                                        Text("Review pending listings, edit details & mark sold/rented", fontSize = 10.sp, color = Color.Gray)
+                                    }
+                                }
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
+                            }
+                        }
+
+                        // Contact Us Quick Tile (Keshi Ghat Office & Phone 9810610554)
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = BrajSaffronGold.copy(alpha = 0.12f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.navigateTo(AppScreen.CONTACT_US) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Place, contentDescription = null, tint = BrajEmeraldPrimary)
+                                    Column {
+                                        Text("Contact Brajvaas Hospitalities", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = BrajEmeraldPrimary)
+                                        Text("Keshi 1, Keshi Ghat, Vrindavan • Ph 9810610554", fontSize = 10.sp, color = Color.DarkGray)
+                                    }
+                                }
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = BrajEmeraldPrimary, modifier = Modifier.size(16.dp))
                             }
                         }
                     }

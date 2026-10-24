@@ -119,6 +119,40 @@ fun HomeScreen(
                         }
                     }
 
+                    // Admin Portal button (shows pending review count badge)
+                    IconButton(
+                        onClick = { viewModel.navigateTo(AppScreen.ADMIN_PORTAL) },
+                        modifier = Modifier.testTag("admin_portal_top_btn")
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (pendingCount > 0) {
+                                    Badge(containerColor = BrajPendingOrange) {
+                                        Text("$pendingCount")
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AdminPanelSettings,
+                                contentDescription = "Admin Portal",
+                                tint = BrajEmeraldPrimary
+                            )
+                        }
+                    }
+
+                    // Direct Contact Us button (Brajvaas Hospitalities, Keshi Ghat)
+                    IconButton(
+                        onClick = { viewModel.navigateTo(AppScreen.CONTACT_US) },
+                        modifier = Modifier.testTag("contact_us_top_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Phone,
+                            contentDescription = "Contact Brajvaas Hospitalities",
+                            tint = BrajEmeraldPrimary
+                        )
+                    }
+
                     // Direct chat inbox button
                     IconButton(
                         onClick = { viewModel.navigateTo(AppScreen.MESSAGES) },

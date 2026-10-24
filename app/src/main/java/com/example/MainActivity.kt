@@ -217,6 +217,10 @@ fun BrajvaasApp(viewModel: BrajvaasViewModel) {
                     viewModel = viewModel,
                     onBack = { viewModel.navigateBack() }
                 )
+                AppScreen.CONTACT_US -> ContactUsScreen(
+                    viewModel = viewModel,
+                    onBack = { viewModel.navigateBack() }
+                )
             }
         }
     }

@@ -155,7 +155,14 @@
       <span class="logo-badge">Admin Central</span>
       <span style="font-size: 12px; color: #94A3B8;">Vrindavan & Mathura</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <div class="server-pill" style="color: #FBBF24;" title="Total Devotee Site Visits">
+        <span class="indicator" style="background: #F59E0B; box-shadow: 0 0 8px #F59E0B;"></span>
+        <span>Site Visitors: <strong id="admin-visitor-count">101</strong></span>
+      </div>
+      <button class="btn btn-outline" onclick="exportDatabase()" style="color: white; border-color: #0F5A47; background: #073B2E;" title="Download complete database as JSON backup">💾 Export DB</button>
+      <button class="btn btn-outline" onclick="triggerImport()" style="color: white; border-color: #475569;" title="Restore database from JSON backup">📂 Restore DB</button>
+      <input type="file" id="db-file-input" style="display: none;" accept=".json" onchange="handleImportFile(event)">
       <button class="btn btn-reject" onclick="confirmClearAll()" title="Reset and start fresh from beginning">🗑️ Clear All Postings</button>
       <a href="/brajvaas.apk" class="btn btn-primary" style="background: #0284C7;">📥 Download APK</a>
       <div class="server-pill">
@@ -359,13 +366,9 @@
           </thead>
           <tbody id="tbody-leads">
             <tr>
-              <td><strong>Mukesh Garg</strong></td>
-              <td>+91 98765 43210 (Vrindavan)</td>
-              <td>2 BHK Spiritual Ashram Flat (Raman Reti)</td>
-              <td><span class="badge badge-pending">Assisted Darshan Visit</span></td>
-              <td>27.5794° N, 77.6881° E</td>
-              <td><span class="badge badge-approved">Contacted</span></td>
-              <td><a href="tel:+919876543210" class="btn btn-outline">Call Devotee</a></td>
+              <td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">
+                No devotee inquiries pending. New inquiries from the website will appear here in real time.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -378,7 +381,9 @@
         <div class="card-header-row">
           <div class="card-title">
             <span>15-Day Tenancy Agreements & UP Police KYC Tracker</span>
+            <span class="badge" style="background:#FEF3C7; color:#B45309;" id="badge-agreements-status">0 Ongoing</span>
           </div>
+          <button class="btn btn-outline" onclick="showToast('Agreements are generated automatically when a tenancy deal is finalized')">ℹ️ Agreement Policy</button>
         </div>
         <table>
           <thead>
@@ -392,15 +397,11 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-agreements">
             <tr>
-              <td><strong>#AGR-VRN-8802</strong></td>
-              <td>Gopal Das ↔ Radhika Kunj Trust</td>
-              <td>2 BHK Ashram Flat, Raman Reti</td>
-              <td><strong style="color:var(--primary);">₹8,250 (15 Days)</strong></td>
-              <td><span class="badge badge-approved">Stamp Executed</span></td>
-              <td><span class="badge badge-approved">Mathura Police Cleared</span></td>
-              <td><button class="btn btn-outline" onclick="showToast('Official PDF agreement dispatched')">View Draft</button></td>
+              <td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">
+                No ongoing tenancy agreements currently active (0 records). All agreements have been cleared.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -426,14 +427,11 @@
               <th>KYC Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-users">
             <tr>
-              <td><strong>Mukesh Garg</strong></td>
-              <td>+91 98765 43210</td>
-              <td><span class="badge badge-approved">Seeker</span></td>
-              <td>Vrindavan</td>
-              <td style="font-family: monospace;">27.5794° N, 77.6881° E</td>
-              <td><span class="badge badge-kyc-yes">KYC Verified</span></td>
+              <td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">
+                No registered devotee sessions logged yet.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -519,17 +517,27 @@
   <script>
     // In-memory / LocalStorage Database
     let properties = [];
+    let agreements = [];
+    let leads = [];
+    let users = [];
+    let visitorCount = 101;
 
     // Load initial data
     async function initDatabase() {
-      // 1. Try fetching from live app backend if running under embedded server or proxy
+      // 1. Try fetching from live app backend
       try {
         const res = await fetch('/api/data');
         if (res.ok) {
           const snapshot = await res.json();
-          if (snapshot && Array.isArray(snapshot.properties)) {
-            properties = snapshot.properties;
-            localStorage.setItem('brajvaas_admin_properties', JSON.stringify(properties));
+          if (snapshot) {
+            properties = Array.isArray(snapshot.properties) ? snapshot.properties : [];
+            agreements = Array.isArray(snapshot.agreements) ? snapshot.agreements : [];
+            leads = Array.isArray(snapshot.leads) ? snapshot.leads : [];
+            users = Array.isArray(snapshot.users) ? snapshot.users : [];
+            if (typeof snapshot.visitorCount === 'number') {
+              visitorCount = snapshot.visitorCount;
+            }
+            saveDatabase();
             renderAll();
             return;
           }
@@ -538,21 +546,29 @@
         // Fallback to localStorage for standalone browser deployment
       }
 
-      const saved = localStorage.getItem('brajvaas_admin_properties');
-      if (saved) {
-        try {
-          properties = JSON.parse(saved);
-        } catch(e) {
-          properties = [];
-        }
-      } else {
-        properties = []; // Starts fresh from beginning!
+      const savedProps = localStorage.getItem('brajvaas_admin_properties');
+      const savedAgrs = localStorage.getItem('brajvaas_admin_agreements');
+      const savedLeads = localStorage.getItem('brajvaas_admin_leads');
+      const savedUsers = localStorage.getItem('brajvaas_admin_users');
+      const savedVisitors = localStorage.getItem('brajvaas_visitor_count');
+
+      try { properties = savedProps ? JSON.parse(savedProps) : []; } catch(_) { properties = []; }
+      try { agreements = savedAgrs ? JSON.parse(savedAgrs) : []; } catch(_) { agreements = []; }
+      try { leads = savedLeads ? JSON.parse(savedLeads) : []; } catch(_) { leads = []; }
+      try { users = savedUsers ? JSON.parse(savedUsers) : []; } catch(_) { users = []; }
+      if (savedVisitors) {
+        const v = parseInt(savedVisitors, 10);
+        if (!isNaN(v) && v >= 101) visitorCount = v;
       }
       renderAll();
     }
 
     function saveDatabase() {
       localStorage.setItem('brajvaas_admin_properties', JSON.stringify(properties));
+      localStorage.setItem('brajvaas_admin_agreements', JSON.stringify(agreements));
+      localStorage.setItem('brajvaas_admin_leads', JSON.stringify(leads));
+      localStorage.setItem('brajvaas_admin_users', JSON.stringify(users));
+      localStorage.setItem('brajvaas_visitor_count', visitorCount.toString());
       renderAll();
     }
 
@@ -592,6 +608,25 @@
       document.getElementById('stat-archived').innerText = archived.length;
       document.getElementById('count-archived').innerText = archived.length;
       document.getElementById('badge-archived-status').innerText = archived.length + ' Closed';
+
+      // Agreements & Leads counters
+      const statAgr = document.getElementById('stat-agreements');
+      const countAgr = document.getElementById('count-agreements');
+      const badgeAgr = document.getElementById('badge-agreements-status');
+      if (statAgr) statAgr.innerText = agreements.length;
+      if (countAgr) countAgr.innerText = agreements.length;
+      if (badgeAgr) badgeAgr.innerText = agreements.length + ' Ongoing';
+
+      const statLeads = document.getElementById('stat-leads');
+      const countLeads = document.getElementById('count-leads');
+      if (statLeads) statLeads.innerText = leads.length;
+      if (countLeads) countLeads.innerText = leads.length;
+
+      const countUsers = document.getElementById('count-users');
+      if (countUsers) countUsers.innerText = users.length;
+
+      const adminVis = document.getElementById('admin-visitor-count');
+      if (adminVis) adminVis.innerText = Number(visitorCount).toLocaleString('en-IN');
 
       // 1. Render Pending
       const tbodyPending = document.getElementById('tbody-pending');
@@ -685,6 +720,65 @@
             </td>
           </tr>
         `).join('');
+      }
+
+      // 4. Render Agreements (Empty state by default, clears ongoing agreement clutter)
+      const tbodyAgr = document.getElementById('tbody-agreements');
+      if (tbodyAgr) {
+        if (agreements.length === 0) {
+          tbodyAgr.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">No ongoing tenancy agreements currently active (0 records). All agreements have been cleared.</td></tr>`;
+        } else {
+          tbodyAgr.innerHTML = agreements.map(a => `
+            <tr>
+              <td><strong>#${escapeHtml(a.id)}</strong></td>
+              <td>${escapeHtml(a.tenantName || 'Devotee')} ↔ ${escapeHtml(a.landlordName || 'Owner')}</td>
+              <td>${escapeHtml(a.propertyTitle || 'Vrindavan Flat')}</td>
+              <td><strong style="color:var(--primary);">₹${Number(a.brokerage15DaysFee || 7500).toLocaleString('en-IN')} (15 Days)</strong></td>
+              <td><span class="badge badge-approved">${escapeHtml(a.agreementStatus || 'DRAFTED')}</span></td>
+              <td><span class="badge badge-approved">${escapeHtml(a.policeVerificationStatus || 'CLEARED')}</span></td>
+              <td><button class="btn btn-outline" onclick="showToast('Agreement ID: ${escapeHtml(a.id)}')">View Details</button></td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      // 5. Render Leads
+      const tbodyLeads = document.getElementById('tbody-leads');
+      if (tbodyLeads) {
+        if (leads.length === 0) {
+          tbodyLeads.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">No devotee inquiries pending. New inquiries from the website will appear here in real time.</td></tr>`;
+        } else {
+          tbodyLeads.innerHTML = leads.map(l => `
+            <tr>
+              <td><strong>${escapeHtml(l.userName || 'Devotee')}</strong></td>
+              <td><a href="tel:${escapeHtml(l.userPhone)}" style="color:var(--primary); font-weight:700;">${escapeHtml(l.userPhone)}</a></td>
+              <td>${escapeHtml(l.propertyTitle || 'General Inquiry')}</td>
+              <td><span class="badge badge-pending">${escapeHtml(l.leadType || 'Inquiry')}</span></td>
+              <td style="font-family:monospace; font-size:11px;">${escapeHtml(l.userExactLocation || 'Keshi Ghat')}</td>
+              <td><span class="badge badge-approved">${escapeHtml(l.status || 'Received')}</span></td>
+              <td><a href="tel:${escapeHtml(l.userPhone)}" class="btn btn-outline">Call Devotee</a></td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      // 6. Render Users
+      const tbodyUsers = document.getElementById('tbody-users');
+      if (tbodyUsers) {
+        if (users.length === 0) {
+          tbodyUsers.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">No registered devotee sessions logged yet.</td></tr>`;
+        } else {
+          tbodyUsers.innerHTML = users.map(u => `
+            <tr>
+              <td><strong>${escapeHtml(u.name || 'Devotee')}</strong></td>
+              <td>${escapeHtml(u.phone || 'Protected')}</td>
+              <td><span class="badge badge-approved">${escapeHtml(u.role || 'Devotee')}</span></td>
+              <td>${escapeHtml(u.city || 'Vrindavan')}</td>
+              <td style="font-family:monospace; font-size:11px;">${escapeHtml(u.lastCoordinates || '27.5794° N, 77.6881° E')}</td>
+              <td><span class="badge badge-kyc-yes">Verified</span></td>
+            </tr>
+          `).join('');
+        }
       }
     }
 
@@ -781,12 +875,73 @@
     }
 
     function confirmClearAll() {
-      if (confirm('Are you sure you want to clear all property postings? This will reset all listings so you can start completely fresh.')) {
+      if (confirm('Are you sure you want to clear all property postings and agreements? This will reset the system completely fresh (0 entries) so you can start posting from the beginning.')) {
         properties = [];
+        agreements = [];
+        leads = [];
         saveDatabase();
         fetch('/api/clear-all').catch(() => {});
-        showToast('All postings cleared! Starting fresh from beginning.');
+        showToast('All postings and agreements cleared fresh! Starting from beginning.');
       }
+    }
+
+    // Database Backup & Restore Functions
+    function exportDatabase() {
+      const fullData = {
+        properties,
+        agreements,
+        leads,
+        users,
+        visitorCount,
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `brajvaas_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Database exported successfully as JSON backup!');
+    }
+
+    function triggerImport() {
+      document.getElementById('db-file-input').click();
+    }
+
+    function handleImportFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data && Array.isArray(data.properties)) {
+            properties = data.properties || [];
+            agreements = data.agreements || [];
+            leads = data.leads || [];
+            users = data.users || [];
+            if (typeof data.visitorCount === 'number') visitorCount = data.visitorCount;
+            saveDatabase();
+            try {
+              await fetch('/api/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+            } catch (_) {}
+            showToast(`Database restored! ${properties.length} properties, ${agreements.length} agreements.`);
+          } else {
+            alert('Invalid backup file. Please select a valid Brajvaas JSON backup.');
+          }
+        } catch (err) {
+          alert('Error parsing backup file: ' + err.message);
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
     }
 
     function seedDemoListing() {

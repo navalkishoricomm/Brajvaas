@@ -1,15 +1,24 @@
 package com.example.data.repository
 
+import android.content.Context
 import com.example.R
 import com.example.data.model.*
+import com.example.data.network.BrajvaasApiClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class BrajvaasRepository {
+class BrajvaasRepository(private val context: Context? = null) {
+
+    private val localStore: BrajvaasLocalStore? = context?.let { BrajvaasLocalStore(it) }
+    private val scope = CoroutineScope(Dispatchers.IO)
+
 
     private val _properties = MutableStateFlow<List<PropertyListing>>(emptyList())
     val properties: StateFlow<List<PropertyListing>> = _properties.asStateFlow()
@@ -71,6 +80,31 @@ class BrajvaasRepository {
 
     private val _supportTickets = MutableStateFlow<List<SupportTicket>>(getInitialSupportTickets())
     val supportTickets: StateFlow<List<SupportTicket>> = _supportTickets.asStateFlow()
+
+    init {
+        // 1. Restore local cache if available on device
+        localStore?.loadProperties()?.let { cached ->
+            if (cached.isNotEmpty()) {
+                _properties.value = cached
+            }
+        }
+        localStore?.loadAgreements()?.let { cachedAgr ->
+            if (cachedAgr.isNotEmpty()) {
+                _agreements.value = cachedAgr
+            }
+        }
+
+        // 2. Fetch latest live properties from VPS Backend
+        scope.launch {
+            try {
+                val remote = BrajvaasApiClient.fetchProperties()
+                if (remote != null) {
+                    _properties.value = remote
+                    localStore?.saveProperties(remote)
+                }
+            } catch (_: Exception) {}
+        }
+    }
 
     // Auth actions
     fun login(phoneOrEmail: String, role: UserRole = UserRole.SEEKER) {
@@ -326,18 +360,28 @@ class BrajvaasRepository {
         _userInterestLeads.update { listOf(lead) + it }
     }
 
-    // Post Property with Location Logging
+    // Post Property with Location Logging & VPS Network Sync
     fun postProperty(newListing: PropertyListing) {
         val user = _currentUser.value
         val coords = newListing.loggedCoordinates.ifBlank { user?.lastKnownCoordinates ?: "27.5794° N, 77.6881° E" }
         val loc = newListing.loggedLocality.ifBlank { "${newListing.locality}, ${newListing.city}" }
 
+        val finalized = newListing.copy(
+            approvalStatus = ApprovalStatus.PENDING_APPROVAL,
+            loggedCoordinates = coords,
+            loggedLocality = loc
+        )
+
         _properties.update { current ->
-            listOf(newListing.copy(
-                approvalStatus = ApprovalStatus.PENDING_APPROVAL,
-                loggedCoordinates = coords,
-                loggedLocality = loc
-            )) + current
+            listOf(finalized) + current.filter { it.id != finalized.id }
+        }
+        localStore?.saveProperties(_properties.value)
+
+        // Asynchronously post to VPS backend so Admin at admin.brajvaas.in sees it immediately!
+        scope.launch {
+            try {
+                BrajvaasApiClient.postProperty(finalized)
+            } catch (_: Exception) {}
         }
 
         // Log exact location of user posting property
@@ -453,6 +497,12 @@ class BrajvaasRepository {
                 } else it
             }
         }
+        localStore?.saveProperties(_properties.value)
+        scope.launch {
+            try {
+                BrajvaasApiClient.approveProperty(propertyId)
+            } catch (_: Exception) {}
+        }
     }
 
     fun adminReject(propertyId: String, feedback: String) {
@@ -466,6 +516,12 @@ class BrajvaasRepository {
                 } else it
             }
         }
+        localStore?.saveProperties(_properties.value)
+        scope.launch {
+            try {
+                BrajvaasApiClient.rejectProperty(propertyId, feedback)
+            } catch (_: Exception) {}
+        }
     }
 
     fun adminToggleVerification(propertyId: String) {
@@ -476,6 +532,7 @@ class BrajvaasRepository {
                 } else it
             }
         }
+        localStore?.saveProperties(_properties.value)
     }
 
     fun updatePropertyAvailability(propertyId: String, newStatus: AvailabilityStatus) {
@@ -490,6 +547,12 @@ class BrajvaasRepository {
                 } else it
             }
         }
+        localStore?.saveProperties(_properties.value)
+        scope.launch {
+            try {
+                BrajvaasApiClient.updateAvailability(propertyId, newStatus)
+            } catch (_: Exception) {}
+        }
     }
 
     fun updatePropertyDetails(updated: PropertyListing) {
@@ -497,6 +560,12 @@ class BrajvaasRepository {
             list.map {
                 if (it.id == updated.id) updated else it
             }
+        }
+        localStore?.saveProperties(_properties.value)
+        scope.launch {
+            try {
+                BrajvaasApiClient.editProperty(updated)
+            } catch (_: Exception) {}
         }
     }
 
@@ -506,6 +575,13 @@ class BrajvaasRepository {
         _visitedProperties.value = emptyList()
         _userInterestLeads.value = emptyList()
         _shortStayBookings.value = emptyList()
+        _agreements.value = emptyList()
+        localStore?.clearAll()
+        scope.launch {
+            try {
+                BrajvaasApiClient.clearAll()
+            } catch (_: Exception) {}
+        }
     }
 
     fun getOrCreateConversation(property: PropertyListing): String {
@@ -797,117 +873,9 @@ class BrajvaasRepository {
         )
     }
 
-    private fun getInitialLocationLogs(): List<UserLocationAuditLog> {
-        val now = System.currentTimeMillis()
-        return listOf(
-            UserLocationAuditLog(
-                id = "LOC-98101",
-                userId = "user_govind_02",
-                userName = "Govind Das Sharma",
-                userPhone = "+91 98223 11223",
-                actionType = "POSTED_PROPERTY",
-                actionDescription = "Posted 2 BHK Ashram Flat in Raman Reti for Rent (₹16,500/mo)",
-                propertyId = "prop_1",
-                propertyTitle = "2 BHK Spiritual Ashram Flat with Balcony & Mandir",
-                exactCoordinates = "27.5794° N, 77.6881° E",
-                geoLocality = "Raman Reti, Vrindavan, Mathura District",
-                timestamp = now - 36000000
-            ),
-            UserLocationAuditLog(
-                id = "LOC-98102",
-                userId = "user_mukesh_01",
-                userName = "Mukesh Garg",
-                userPhone = "+91 98765 43210",
-                actionType = "PROPERTY_LIKED",
-                actionDescription = "Shortlisted 2 BHK Krishna Krupa Flat near ISKCON",
-                propertyId = "prop_1",
-                propertyTitle = "2 BHK Spiritual Ashram Flat with Balcony & Mandir",
-                exactCoordinates = "27.5794° N, 77.6881° E",
-                geoLocality = "Near Bhaktivedanta Hospice, Raman Reti, Vrindavan",
-                timestamp = now - 18000000
-            ),
-            UserLocationAuditLog(
-                id = "LOC-98103",
-                userId = "user_ananya_04",
-                userName = "Ananya Devi",
-                userPhone = "+91 94120 55443",
-                actionType = "SHORT_STAY_BOOKING",
-                actionDescription = "Booked 3 Nights Vrindavan Homestay near Prem Mandir",
-                propertyId = "prop_short_1",
-                propertyTitle = "Divine 1 BHK Ashram Homestay (Near Prem Mandir)",
-                exactCoordinates = "27.5812° N, 77.6795° E",
-                geoLocality = "Chhatikara Road, Vrindavan, Mathura District",
-                timestamp = now - 7200000
-            ),
-            UserLocationAuditLog(
-                id = "LOC-98104",
-                userId = "user_mukesh_01",
-                userName = "Mukesh Garg",
-                userPhone = "+91 98765 43210",
-                actionType = "RENT_INQUIRY",
-                actionDescription = "Requested 15-Day Agreement & Mathura Police Verification",
-                propertyId = "prop_1",
-                propertyTitle = "2 BHK Krishna Krupa Flat (A-304)",
-                exactCoordinates = "27.5794° N, 77.6881° E",
-                geoLocality = "Raman Reti, Vrindavan, Mathura District",
-                timestamp = now - 3600000
-            ),
-            UserLocationAuditLog(
-                id = "LOC-98105",
-                userId = "user_mukesh_01",
-                userName = "Mukesh Garg",
-                userPhone = "+91 98765 43210",
-                actionType = "BUY_INQUIRY",
-                actionDescription = "Shortlisted 3 BHK Luxury Kothi in Rukmini Vihar (₹1.45 Cr)",
-                propertyId = "prop_3",
-                propertyTitle = "3 BHK Luxury Kothi with Private Garden",
-                exactCoordinates = "27.5610° N, 77.6520° E",
-                geoLocality = "Rukmini Vihar MVDA Colony, Vrindavan",
-                timestamp = now - 1200000
-            )
-        )
-    }
+    private fun getInitialLocationLogs(): List<UserLocationAuditLog> = emptyList()
 
-    private fun getInitialAgreements(): List<RentalAgreementTracker> {
-        return listOf(
-            RentalAgreementTracker(
-                id = "AGR-1024",
-                propertyId = "prop_1",
-                propertyTitle = "2 BHK Krishna Krupa Flat (A-304)",
-                locality = "Raman Reti, Vrindavan",
-                monthlyRent = 16500,
-                brokerage15DaysFee = 8250, // 15 Days Rent
-                tenantName = "Mukesh Garg",
-                landlordName = "Govind Das Sharma",
-                agreementStatus = AgreementStepStatus.E_STAMPED,
-                policeVerificationStatus = PoliceVerificationStatus.UPCOP_POLICE_SUBMITTED,
-                agreementNumber = "BV-AGR-2026-8812",
-                policeAckNumber = "UPCOP-VRN-2026-94812",
-                initiatedDate = "05 Oct 2026",
-                targetPossessionDate = "15 Oct 2026",
-                isBrokeragePaidByTenant = true,
-                isBrokeragePaidByLandlord = false
-            ),
-            RentalAgreementTracker(
-                id = "AGR-1025",
-                propertyId = "prop_2",
-                propertyTitle = "1 RK Divine Studio Suite",
-                locality = "Ganpati Infinity, Chhatikara Rd",
-                monthlyRent = 8500,
-                brokerage15DaysFee = 4250, // 15 Days Rent
-                tenantName = "Mukesh Garg",
-                landlordName = "Radhe Shyam Agarwal",
-                agreementStatus = AgreementStepStatus.COMPLETED,
-                policeVerificationStatus = PoliceVerificationStatus.VERIFIED_CLEARED,
-                agreementNumber = "BV-AGR-2026-7201",
-                policeAckNumber = "UPCOP-VRN-2026-82190",
-                initiatedDate = "20 Sep 2026",
-                targetPossessionDate = "01 Oct 2026",
-                isBrokeragePaidByTenant = true,
-                isBrokeragePaidByLandlord = true
-            )
-        )
-    }
+    private fun getInitialAgreements(): List<RentalAgreementTracker> = emptyList()
 
     private fun getInitialProperties(): List<PropertyListing> = emptyList()
 
